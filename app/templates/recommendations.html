@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Recommendations — {{ event.name }}{% endblock %}
+{% block content %}
+  <h1>Restaurant recommendations</h1>
+  <p class="subtitle">{{ event.name }}</p>
+
+  {% if not result.has_preferences %}
+    <div class="card">
+      <p>No one has submitted preferences yet.</p>
+      <a class="btn" href="{{ url_for('main.preferences', event_id=event.id) }}">Submit your preferences</a>
+    </div>
+  {% elif not result.restaurants %}
+    <div class="card">
+      <p>No restaurant matches everyone's preferences, and no fallback options are available.</p>
+      <a class="btn" href="{{ url_for('main.preferences', event_id=event.id) }}">Edit preferences</a>
+    </div>
+  {% else %}
+    {% if result.is_fallback %}
+      <div class="card flash error">
+        <strong>No restaurant satisfies everyone's preferences.</strong>
+        Showing the closest available options instead (they may not fully match your group's
+        budget, dietary, or distance constraints).
+        <a href="{{ url_for('main.preferences', event_id=event.id) }}">Edit preferences</a>.
+      </div>
+    {% endif %}
+
+    <ol class="restaurant-list">
+      {% for r in result.restaurants %}
+        <li class="restaurant">
+          <div class="name">{{ r.name }}</div>
+          <div class="meta">{{ r.cuisine }} · {{ '$' * r.price_level }} · {{ r.distance_mi }} mi · ★ {{ r.rating }}</div>
+          {% if r.dietary_tags %}
+            <div>
+              {% for tag in r.dietary_tags %}<span class="tag">{{ tag.replace('_', ' ') }}</span>{% endfor %}
+            </div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+
+    {% if not finalized %}
+      <a class="btn" href="{{ url_for('main.vote', event_id=event.id) }}">Proceed to vote</a>
+    {% endif %}
+  {% endif %}
+
+  <footer class="hint">
+    <a href="{{ url_for('main.event_home', event_id=event.id) }}">Back to event</a> ·
+    <a href="{{ url_for('main.home') }}">Back to home</a>
+  </footer>
+{% endblock %}

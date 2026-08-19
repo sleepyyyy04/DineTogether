@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Event created — DineTogether{% endblock %}
+{% block content %}
+  <h1>Event created 🎉</h1>
+  <p class="subtitle"><strong>{{ event.name }}</strong> is ready.</p>
+
+  <div class="card">
+    <p>Share this invitation code with your group:</p>
+    <div class="invite-code"><strong>{{ event.invite_code }}</strong></div>
+    <a class="btn" href="{{ url_for('main.event_home', event_id=event.id) }}">Continue to the event</a>
+  </div>
+
+  <footer class="hint"><a href="{{ url_for('main.home') }}">Back to home</a></footer>
+{% endblock %}

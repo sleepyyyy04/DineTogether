@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Register — DineTogether{% endblock %}
+{% block content %}
+  <h1>Create an account</h1>
+  <p class="subtitle">One account lets you create and join events, and see your history across all of them.</p>
+
+  <div class="card">
+    <form method="post" action="{{ url_for('main.register') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <label for="display_name">Your name</label>
+      <input type="text" id="display_name" name="display_name" maxlength="40" required
+             aria-invalid="{{ 'true' if field_error == 'display_name' else 'false' }}">
+
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" minlength="3" maxlength="30" required
+             aria-invalid="{{ 'true' if field_error == 'username' else 'false' }}">
+
+      <label for="password">Password (at least 8 characters)</label>
+      <input type="password" id="password" name="password" minlength="8" required
+             aria-invalid="{{ 'true' if field_error == 'password' else 'false' }}">
+
+      <button type="submit">Create account</button>
+    </form>
+  </div>
+
+  <footer class="hint">Already have an account? <a href="{{ url_for('main.login') }}">Log in</a></footer>
+{% endblock %}

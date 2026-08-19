@@ -1,0 +1,121 @@
+name,cuisine,price_level,dietary_tags,distance_mi,rating
+Urban Curry House,Indian,2,,5.2,3.8
+Stone Kitchen,Vietnamese,1,"gluten_free,kosher",14.3,3.1
+Blue Basil House,Thai,4,,13.9,3.8
+Classic Cafe,Mediterranean,4,vegetarian,1.5,4.3
+Garden Tavern,American,3,,0.4,4.6
+Little Sushi Bar,Japanese,1,"halal,vegetarian",4.2,4.6
+Fresh Table,Vietnamese,4,gluten_free,10.7,3.6
+River Garden,Chinese,1,,11.5,3.1
+Stone Grill,Mediterranean,2,,8.7,3.5
+Modern Cafe,French,4,,4.7,3.5
+Cast Iron Brasserie,French,3,,9.8,3.2
+Harbor Trattoria,Italian,1,vegan,15.9,4.9
+Willow Palace,Chinese,4,kosher,11.8,5.0
+Garden Pho House,Vietnamese,4,kosher,12.7,4.4
+Silver Wok,Chinese,4,,7.6,3.7
+Rustic Casa,Mexican,2,kosher,3.9,4.4
+Amber Table,Mediterranean,4,vegan,17.3,3.2
+Green Brasserie,French,4,halal,13.7,4.0
+Cozy Grill,American,1,"halal,vegan",13.0,4.1
+Northside Cafe,Vietnamese,2,,9.9,3.9
+Green Ristorante,Italian,4,kosher,8.6,4.2
+Velvet Sushi Bar,Japanese,3,vegetarian,11.5,4.0
+Willow Ramen House,Japanese,2,vegan,12.1,3.4
+Green Pizzeria,Italian,3,vegan,9.1,3.4
+Garden Cafe,Vietnamese,2,vegetarian,4.8,4.9
+Sunny House,Chinese,2,"kosher,vegetarian",1.6,4.7
+Sunny Thai Table,Thai,3,,1.7,4.8
+Spice Casa,Mexican,4,,5.6,3.3
+Cedar Curry House,Indian,1,,15.9,3.2
+Golden Spice Kitchen,Indian,2,kosher,4.9,4.3
+Golden Grill,Mexican,1,vegan,4.1,3.1
+Silver Taverna,Mediterranean,1,,10.3,4.6
+Rustic Patisserie,French,3,kosher,9.7,3.9
+Amber Cafe,Thai,4,halal,17.0,4.0
+Lantern Cafe,Thai,1,,10.8,4.8
+Brick Tandoor,Indian,4,halal,13.3,3.0
+Classic Bistro,American,2,,12.7,4.3
+Blue Casa,Mexican,1,,1.5,4.7
+Cedar Garden,Chinese,4,vegan,8.7,3.5
+Blossom Palace,Indian,2,,4.5,4.9
+Willow Basil House,Thai,2,"halal,kosher",7.5,3.1
+Garden Garden,Vietnamese,4,halal,4.4,3.6
+Stone Izakaya,Japanese,3,,3.8,3.4
+Harbor Spice Kitchen,Indian,1,vegetarian,7.8,3.2
+Cozy Brasserie,French,4,"gluten_free,kosher",10.7,3.6
+Maple Sushi Bar,Japanese,4,,3.7,4.8
+Paper Pizzeria,Italian,1,"kosher,vegan",5.6,4.7
+Lantern Grill,American,2,"gluten_free,vegan",7.0,3.3
+Garden Casa,Mexican,3,"gluten_free,vegetarian",17.8,4.2
+Amber Trattoria,Italian,2,kosher,14.3,4.3
+River Casa,Mexican,1,"halal,vegan",1.3,4.5
+Amber Garden,Thai,2,vegetarian,5.1,4.0
+Cast Iron Diner,American,1,,0.9,4.2
+River Grill,American,1,vegetarian,4.3,3.1
+Velvet Wok,Chinese,1,,6.3,3.8
+Sunny Patisserie,French,3,,9.4,4.1
+Harbor Basil House,Thai,3,,12.9,3.9
+Green Wok,Chinese,3,vegan,4.5,3.1
+Big Ristorante,Italian,1,kosher,15.8,4.9
+Cedar Basil House,Thai,1,"gluten_free,kosher",14.5,3.9
+Amber Grill,American,1,vegan,8.3,3.8
+Willow Patisserie,French,2,"gluten_free,vegan",17.5,3.5
+Velvet Trattoria,Italian,3,halal,6.3,4.5
+Garden Wok,Chinese,2,"kosher,vegan",6.3,3.4
+Cedar Table,Vietnamese,4,gluten_free,1.0,3.2
+Copper Table,French,1,halal,10.5,4.7
+Cast Iron Grill,Mediterranean,2,,2.2,4.9
+Northside Cantina,Mexican,2,"gluten_free,vegan",16.0,3.5
+Stone Pho House,Vietnamese,4,,10.5,4.0
+Maple Kitchen,Chinese,4,,16.7,4.9
+Cast Iron Kitchen,American,1,"gluten_free,kosher",7.0,4.9
+Northside Taverna,Mediterranean,4,,13.0,3.8
+Silver Spice Kitchen,Indian,2,,17.7,4.2
+Blue Izakaya,Japanese,4,halal,13.9,4.2
+Copper Diner,American,1,,4.6,4.5
+Rustic Kitchen,Japanese,1,"gluten_free,kosher",4.0,3.6
+Spice Kitchen,Mediterranean,3,halal,16.6,4.2
+Classic Pizzeria,Italian,2,,1.9,4.0
+Spice Cafe,Mediterranean,3,,4.6,3.6
+Urban Garden,Chinese,2,,2.8,4.1
+Velvet Taqueria,Mexican,4,,16.1,3.2
+Garden Bistro,French,1,,7.5,3.6
+Paper Spice Kitchen,Indian,3,"gluten_free,vegetarian",7.4,4.3
+Willow Kitchen,American,3,vegetarian,4.1,3.6
+Blossom Grill,Japanese,2,vegan,7.1,4.4
+Stone Spice Kitchen,Indian,2,vegetarian,1.0,3.9
+Modern Kitchen,Mediterranean,4,gluten_free,13.8,3.7
+Big Grill,Mexican,1,gluten_free,5.0,5.0
+Modern Sushi Bar,Japanese,3,halal,12.1,4.0
+River Kitchen,Mediterranean,4,,13.9,4.4
+Sunny Pho House,Vietnamese,2,,10.1,3.5
+Blue Garden,Vietnamese,1,,4.0,4.9
+Little Osteria,Italian,2,"gluten_free,vegetarian",14.1,4.1
+Sunny Pizzeria,Italian,2,"halal,kosher",9.8,4.5
+Paper Table,Mediterranean,3,"gluten_free,vegetarian",8.6,4.7
+Green Grill,Mexican,3,vegan,3.9,4.9
+Sunny Grill,Mexican,2,vegetarian,5.6,4.3
+Blossom Spice Kitchen,Indian,2,kosher,12.1,4.4
+Northside Cocina,Mexican,1,,6.8,4.8
+Little Kitchen,Vietnamese,3,"halal,vegan",4.7,3.2
+Stone Diner,American,2,gluten_free,14.5,4.6
+Northside Grill,Japanese,2,kosher,1.5,3.7
+Fresh Thai Table,Thai,4,,15.2,4.4
+Sunny Tandoor,Indian,1,vegan,1.0,3.8
+Cast Iron Garden,Thai,4,kosher,4.7,3.5
+Paper Cucina,Italian,2,"gluten_free,vegan",8.7,3.3
+Big House,Chinese,4,,15.6,4.0
+Cozy Palace,Indian,3,,14.4,3.6
+Green Garden,Thai,2,halal,3.5,4.7
+Garden Kitchen,Japanese,4,,9.3,4.4
+Silver Grill,Japanese,4,kosher,14.2,3.7
+Blue Pizzeria,Italian,1,,8.9,3.2
+Sunny Table,French,2,gluten_free,10.4,4.5
+Golden Pho House,Vietnamese,2,"kosher,vegetarian",15.1,4.9
+Green Kitchen,American,1,vegetarian,6.4,3.7
+Paper Garden,Thai,4,,10.0,4.7
+Copper Kitchen,Chinese,1,,16.7,4.9
+Silver Brasserie,French,3,,3.5,3.5
+Urban Grill,Mediterranean,1,,17.1,4.5
+Golden Table,French,3,gluten_free,4.1,3.4

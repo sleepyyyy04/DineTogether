@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Preferences — {{ event.name }}{% endblock %}
+{% block content %}
+  <h1>Your preferences</h1>
+  <p class="subtitle">{{ event.name }}</p>
+
+  <div class="card">
+    <form method="post" action="{{ url_for('main.preferences', event_id=event.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <fieldset class="option-group" aria-invalid="{{ 'true' if field_error == 'cuisine' else 'false' }}">
+        <legend>Cuisine (choose one or more)</legend>
+        {% for c in cuisines %}
+          <label class="vote-option">
+            <input type="checkbox" name="cuisine" value="{{ c }}"
+                   {{ 'checked' if preference and c in preference.cuisines }}>
+            <span>{{ 'No preference' if c == 'any' else c }}</span>
+          </label>
+        {% endfor %}
+      </fieldset>
+
+      <fieldset class="option-group" aria-invalid="{{ 'true' if field_error == 'budget' else 'false' }}">
+        <legend>Budget (choose one or more)</legend>
+        {% for b in budgets %}
+          <label class="vote-option">
+            <input type="checkbox" name="budget" value="{{ b }}"
+                   {{ 'checked' if preference and budgets_by_symbol[b] in preference.budget_levels }}>
+            <span>{{ b }}</span>
+          </label>
+        {% endfor %}
+      </fieldset>
+
+      <fieldset class="option-group" aria-invalid="{{ 'true' if field_error == 'dietary' else 'false' }}">
+        <legend>Dietary requirements (choose one or more)</legend>
+        {% for d in dietary_options %}
+          <label class="vote-option">
+            <input type="checkbox" name="dietary" value="{{ d }}"
+                   {{ 'checked' if preference and d in preference.dietary }}>
+            <span>{{ 'None' if d == 'none' else d.replace('_', ' ') }}</span>
+          </label>
+        {% endfor %}
+      </fieldset>
+
+      <label for="max_distance">Maximum distance (miles, 0.5–25)</label>
+      <input type="number" id="max_distance" name="max_distance" step="0.1" min="0.5" max="25" required
+             value="{{ preference.max_distance_mi if preference else '' }}"
+             aria-invalid="{{ 'true' if field_error == 'max_distance' else 'false' }}">
+
+      <button type="submit">Save preferences</button>
+    </form>
+  </div>
+
+  <footer class="hint">
+    <a href="{{ url_for('main.event_home', event_id=event.id) }}">Back to event</a> ·
+    <a href="{{ url_for('main.home') }}">Back to home</a>
+  </footer>
+{% endblock %}

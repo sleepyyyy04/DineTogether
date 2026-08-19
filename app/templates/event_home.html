@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ event.name }} — DineTogether{% endblock %}
+{% block content %}
+  <h1>{{ event.name }}</h1>
+  <p class="subtitle">Invitation code: <strong>{{ event.invite_code }}</strong></p>
+
+  {% if display_name %}
+    <p>Joined as: <strong>{{ display_name }}</strong></p>
+  {% endif %}
+
+  <h2>Participants</h2>
+  <ul class="participants">
+    {% for participant in participants %}
+      <li>{{ participant.display_name }}</li>
+    {% endfor %}
+  </ul>
+
+  {% if finalized %}
+    <nav class="actions">
+      <a class="btn" href="{{ url_for('main.results', event_id=event.id) }}">View the final decision</a>
+    </nav>
+  {% else %}
+    <nav class="actions">
+      <a class="btn secondary" href="{{ url_for('main.preferences', event_id=event.id) }}">Preferences</a>
+      <a class="btn secondary" href="{{ url_for('main.recommendations', event_id=event.id) }}">Recommendations</a>
+      <a class="btn secondary" href="{{ url_for('main.vote', event_id=event.id) }}">Vote</a>
+      <a class="btn secondary" href="{{ url_for('main.results', event_id=event.id) }}">Results</a>
+    </nav>
+  {% endif %}
+
+  <footer class="hint"><a href="{{ url_for('main.home') }}">Back to home</a></footer>
+{% endblock %}

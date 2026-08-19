@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Create Event — DineTogether{% endblock %}
+{% block content %}
+  <h1>Create an event</h1>
+  <p class="subtitle">You'll be the organizer, joining as {{ current_user.display_name }} — you can also submit preferences and vote.</p>
+
+  <div class="card">
+    <form method="post" action="{{ url_for('main.create_event') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <label for="name">Event name</label>
+      <input type="text" id="name" name="name" maxlength="80" required
+             aria-invalid="{{ 'true' if field_error == 'name' else 'false' }}">
+
+      <button type="submit">Create event</button>
+    </form>
+  </div>
+
+  <footer class="hint"><a href="{{ url_for('main.home') }}">Back home</a></footer>
+{% endblock %}

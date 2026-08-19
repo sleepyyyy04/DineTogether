@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Your history — DineTogether{% endblock %}
+{% block content %}
+  <h1>Your history</h1>
+  <p class="subtitle">Every event you've created or joined, {{ current_user.display_name }}.</p>
+
+  {% if not entries %}
+    <div class="card">
+      <p>You haven't joined any events yet.</p>
+      <a class="btn" href="{{ url_for('main.home') }}">Create or join an event</a>
+    </div>
+  {% else %}
+    <ul class="history-list">
+      {% for entry in entries %}
+        <li>
+          <a href="{{ url_for('main.event_home', event_id=entry.event.id) }}"><strong>{{ entry.event.name }}</strong></a>
+          {% if entry.my_choice %}
+            <div class="meta">Your vote: {{ entry.my_choice.name }}</div>
+          {% endif %}
+          {% if entry.finalized %}
+            {% if entry.is_tie %}
+              <div class="meta">Result: tie, no single winner</div>
+            {% else %}
+              <div class="meta">Result: {{ entry.winner.name }}</div>
+            {% endif %}
+          {% else %}
+            <div class="meta">Not finalized yet</div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <footer class="hint"><a href="{{ url_for('main.home') }}">Back to home</a></footer>
+{% endblock %}

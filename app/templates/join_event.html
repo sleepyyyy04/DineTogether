@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Join Event — DineTogether{% endblock %}
+{% block content %}
+  <h1>Join an event</h1>
+  <p class="subtitle">Joining as {{ current_user.display_name }}.</p>
+
+  <div class="card">
+    <form method="post" action="{{ url_for('main.join_event') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <label for="code">Invitation code</label>
+      <input type="text" id="code" name="code" maxlength="4" required
+             aria-invalid="{{ 'true' if field_error == 'code' else 'false' }}">
+
+      <button type="submit">Join</button>
+    </form>
+  </div>
+
+  <footer class="hint"><a href="{{ url_for('main.home') }}">Back home</a></footer>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Results — {{ event.name }}{% endblock %}
+{% block content %}
+  <h1>Final decision</h1>
+  <p class="subtitle">{{ event.name }}</p>
+
+  {% if not result %}
+    <div class="card">
+      <p>Voting hasn't been finalized yet.</p>
+      <a class="btn" href="{{ url_for('main.vote', event_id=event.id) }}">Go vote</a>
+    </div>
+  {% else %}
+    {% if result.is_tie %}
+      <div class="result-banner">
+        <div class="winner">It's a tie! 🤝</div>
+        <p>No single winner was selected.</p>
+      </div>
+    {% else %}
+      <div class="result-banner">
+        <p>The group is going to</p>
+        <div class="winner">{{ winner.name }}</div>
+      </div>
+    {% endif %}
+
+    <h2>Vote totals</h2>
+    <ul class="vote-totals">
+      {% for name, count in vote_totals.items() %}
+        <li><span>{{ name }}</span><span>{{ count }} vote{{ 's' if count != 1 }}</span></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <footer class="hint">
+    <a href="{{ url_for('main.event_home', event_id=event.id) }}">Back to event</a> ·
+    <a href="{{ url_for('main.home') }}">Back to home</a>
+  </footer>
+{% endblock %}
