@@ -24,19 +24,50 @@
       </div>
     {% endif %}
 
-    <ol class="restaurant-list">
-      {% for r in result.restaurants %}
-        <li class="restaurant">
-          <div class="name">{{ r.name }}</div>
-          <div class="meta">{{ r.cuisine }} · {{ '$' * r.price_level }} · {{ r.distance_mi }} mi · ★ {{ r.rating }}</div>
-          {% if r.dietary_tags %}
-            <div>
-              {% for tag in r.dietary_tags %}<span class="tag">{{ tag.replace('_', ' ') }}</span>{% endfor %}
-            </div>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ol>
+{% set cuisine_images = {
+  "Chinese": "images/chinese.png",
+  "Japanese": "images/japanese.png",
+  "Korean": "images/korean.png",
+  "Italian": "images/italian.png",
+  "Mexican": "images/mexican.png",
+  "Thai": "images/thai.png",
+  "American": "images/american.png",
+  "Mediterranean": "images/mediterranean.png",
+  "Seafood": "images/seafood.png"
+} %}
+
+<ol class="restaurant-list">
+  {% for r in result.restaurants %}
+    <li class="restaurant restaurant-with-image">
+
+      <img
+        class="restaurant-image"
+        src="{{ url_for('static', filename=cuisine_images.get(r.cuisine, 'images/default.png')) }}"
+        alt="{{ r.cuisine }} food"
+      >
+
+      <div class="restaurant-info">
+        <div class="name">{{ r.name }}</div>
+
+        <div class="meta">
+          {{ r.cuisine }}
+          · {{ '$' * r.price_level }}
+          · {{ r.distance_mi }} mi
+          · ★ {{ r.rating }}
+        </div>
+
+        {% if r.dietary_tags %}
+          <div class="restaurant-tags">
+            {% for tag in r.dietary_tags %}
+              <span class="tag">{{ tag.replace('_', ' ') }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+
+    </li>
+  {% endfor %}
+</ol>
 
     {% if not finalized %}
       <a class="btn" href="{{ url_for('main.vote', event_id=event.id) }}">Proceed to vote</a>
