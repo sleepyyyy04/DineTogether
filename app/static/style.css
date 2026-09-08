@@ -603,23 +603,348 @@ footer.hint a {
 }
 
 
+/* Final results page（最终结果页面） */
+
+.results-heading {
+  margin-bottom: 1.8rem;
+}
+
+.results-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.results-heading h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.25rem;
+}
+
+
+/* Winner card（冠军餐厅卡片） */
+
+.final-result-card {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+
+  background: var(--card);
+  border: 2px solid var(--accent);
+  border-radius: 22px;
+
+  padding: 1rem;
+  margin-bottom: 2rem;
+
+  box-shadow: 0 14px 35px rgba(43, 36, 32, 0.08);
+}
+
+.winner-image-wrap {
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.winner-image {
+  width: 100%;
+  height: 190px;
+
+  display: block;
+  object-fit: cover;
+}
+
+.winner-details {
+  padding: 0.5rem 1rem 0.5rem 0;
+}
+
+.winner-badge {
+  display: inline-block;
+
+  background: #fff1d8;
+  color: #9b6500;
+
+  border-radius: 999px;
+
+  padding: 0.35rem 0.75rem;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  margin-bottom: 0.8rem;
+}
+
+.result-label {
+  color: var(--muted);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+
+  margin: 0 0 0.3rem;
+}
+
+.winner-name {
+  color: var(--accent-dark);
+
+  font-size: 1.8rem;
+
+  margin: 0 0 0.4rem;
+}
+
+.winner-meta {
+  color: var(--muted);
+
+  margin: 0 0 0.7rem;
+}
+
+.winner-message {
+  color: var(--ink);
+
+  margin: 0;
+}
+
+
+/* Tie（平票） */
+
+.tie-card {
+  grid-template-columns: auto 1fr;
+  padding: 2rem;
+}
+
+.result-trophy {
+  font-size: 3rem;
+}
+
+
+/* Vote results（投票结果） */
+
+.vote-results-section {
+  background: var(--card);
+
+  border: 1px solid var(--border);
+  border-radius: 20px;
+
+  padding: 1.4rem;
+
+  margin-bottom: 1.5rem;
+}
+
+.vote-results-title {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-end;
+
+  gap: 1rem;
+
+  margin-bottom: 1.4rem;
+}
+
+.vote-results-title h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.total-votes {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.vote-result-row {
+  margin-bottom: 1.2rem;
+}
+
+.vote-result-row:last-child {
+  margin-bottom: 0;
+}
+
+.vote-result-info {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 0.45rem;
+}
+
+.vote-result-info span {
+  color: var(--muted);
+
+  font-size: 0.9rem;
+}
+
+.vote-progress {
+  width: 100%;
+  height: 10px;
+
+  background: #eee5dd;
+
+  border-radius: 999px;
+
+  overflow: hidden;
+}
+
+.vote-progress-fill {
+  height: 100%;
+
+  background: var(--accent);
+
+  border-radius: 999px;
+
+  transition: width 0.4s ease;
+}
+
+
+/* Bottom actions（底部按钮） */
+
+.results-actions {
+  display: flex;
+
+  gap: 0.8rem;
+
+  flex-wrap: wrap;
+
+  margin-top: 1.5rem;
+}
+
+.results-actions .btn {
+  border-radius: 999px;
+
+  min-width: 150px;
+}
+
+
+
+
 
 @media (max-width: 700px) {
 
-  .home-content {
-    padding: 2rem 0;
-  }
-
-  .hero-panel {
-    padding: 1.5rem;
-  }
-
-  .hero-title {
-    font-size: 2.4rem;
-  }
-
-  .home-features {
+  .final-result-card {
     grid-template-columns: 1fr;
   }
 
+  .winner-image {
+    height: 210px;
+  }
+
+  .winner-details {
+    padding: 0.5rem;
+  }
+
+  .vote-results-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+}
+
+
+/* Results page final layout */
+.final-result-card {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+
+  width: 100%;
+  margin: 1.5rem 0 2rem;
+  padding: 1rem;
+
+  background: var(--card);
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(43, 36, 32, 0.08);
+}
+
+/* Winner image */
+.winner-image-wrap {
+  width: 220px;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.winner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Winner information */
+.winner-details {
+  min-width: 0;
+  padding: 0.25rem;
+}
+
+.winner-badge {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  padding: 0.3rem 0.7rem;
+
+  background: #fff1d8;
+  color: #9b6500;
+
+  border-radius: 999px;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.winner-name {
+  margin: 0.25rem 0 0.4rem;
+
+  color: var(--accent-dark);
+
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+.winner-meta,
+.winner-message {
+  margin: 0.35rem 0;
+}
+
+/* Vote results */
+.vote-results-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  padding: 1.3rem;
+  margin-top: 1rem;
+}
+
+.vote-progress {
+  width: 100%;
+  height: 10px;
+
+  margin-top: 0.4rem;
+
+  background: #eee5dd;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.vote-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+/* Mobile layout */
+@media (max-width: 600px) {
+  .final-result-card {
+    grid-template-columns: 1fr;
+  }
+
+  .winner-image-wrap {
+    width: 100%;
+    height: 200px;
+  }
 }
