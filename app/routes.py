@@ -256,6 +256,16 @@ def event_home(event_id: int):
 def preferences(event_id: int):
     event = _require_session_event(event_id)
     participant_id = session["participant_id"]
+    vote_repo = _vote_repo()
+
+    if vote_repo.is_finalized(event_id):
+        flash("This event's final decision has already been saved; preferences are locked.", "error")
+        return redirect(url_for("main.results", event_id=event_id))
+
+    if vote_repo.get_votes_for_participant(event_id, participant_id):
+        flash("You've already voted; preferences are locked until the event is finalized.", "error")
+        return redirect(url_for("main.waiting", event_id=event_id))
+
     existing = _pref_repo().get_for_participant(participant_id)
 
     if request.method == "GET":
@@ -298,6 +308,9 @@ def preferences(event_id: int):
     except preference_service.EventFinalizedError:
         flash("This event's final decision has already been saved; preferences are locked.", "error")
         return redirect(url_for("main.results", event_id=event_id))
+    except preference_service.AlreadyVotedError:
+        flash("You've already voted; preferences are locked until the event is finalized.", "error")
+        return redirect(url_for("main.waiting", event_id=event_id))
 
     flash("Preferences saved.", "success")
     return redirect(url_for("main.recommendations", event_id=event_id))
@@ -306,15 +319,29 @@ def preferences(event_id: int):
 @bp.get("/events/<int:event_id>/recommendations")
 def recommendations(event_id: int):
     event = _require_session_event(event_id)
+    vote_repo = _vote_repo()
+
+    if vote_repo.is_finalized(event_id):
+        return redirect(url_for("main.results", event_id=event_id))
+
+    is_creator = _repo().is_creator(event_id, session["user_id"])
+    my_votes = vote_repo.get_votes_for_participant(event_id, session["participant_id"])
+
+    # Once a regular participant has voted there is nothing left for
+    # them to do here — send them to the waiting page instead. The
+    # host stays, since Finalize lives on this page regardless of
+    # whether the host has personally voted.
+    if my_votes and not is_creator:
+        return redirect(url_for("main.waiting", event_id=event_id))
+
     result = recommendation_service.get_recommendations(_pref_repo(), _restaurant_repo(), event_id)
-    my_votes = _vote_repo().get_votes_for_participant(event_id, session["participant_id"])
     return render_template(
         "recommendations.html",
         event=event,
         result=result,
         my_vote_ids={v.restaurant_id for v in my_votes},
-        finalized=_vote_repo().is_finalized(event_id),
-        is_creator=_repo().is_creator(event_id, session["user_id"]),
+        finalized=False,
+        is_creator=is_creator,
     )
 
 
@@ -341,7 +368,41 @@ def vote(event_id: int):
         return redirect(url_for("main.results", event_id=event_id))
 
     flash("Your vote has been recorded.", "success")
-    return redirect(url_for("main.recommendations", event_id=event_id))
+    # The host stays on the recommendations page (Finalize lives
+    # there); everyone else has nothing left to do but wait.
+    if _repo().is_creator(event_id, session["user_id"]):
+        return redirect(url_for("main.recommendations", event_id=event_id))
+    return redirect(url_for("main.waiting", event_id=event_id))
+
+
+@bp.get("/events/<int:event_id>/waiting")
+def waiting(event_id: int):
+    event = _require_session_event(event_id)
+    vote_repo = _vote_repo()
+
+    if vote_repo.is_finalized(event_id):
+        return redirect(url_for("main.results", event_id=event_id))
+
+    participant_id = session["participant_id"]
+    is_creator = _repo().is_creator(event_id, session["user_id"])
+    my_votes = vote_repo.get_votes_for_participant(event_id, participant_id)
+
+    # Nothing to wait for yet — send a participant who hasn't voted
+    # back to actually vote. The host may still land here to finalize.
+    if not my_votes and not is_creator:
+        return redirect(url_for("main.recommendations", event_id=event_id))
+
+    restaurant_repo = _restaurant_repo()
+    my_restaurants = [restaurant_repo.get_by_id(v.restaurant_id) for v in my_votes]
+
+    return render_template(
+        "waiting.html",
+        event=event,
+        preference=_pref_repo().get_for_participant(participant_id),
+        my_restaurants=my_restaurants,
+        is_creator=is_creator,
+        budgets_by_symbol=ALLOWED_BUDGETS,
+    )
 
 
 @bp.post("/events/<int:event_id>/finalize")
@@ -367,15 +428,24 @@ def results(event_id: int):
     restaurant_repo, vote_repo = _restaurant_repo(), _vote_repo()
     result = voting_service.get_results(vote_repo, event_id)
 
-    winner = None
+    top_choices = []
     vote_totals = {}
     if result:
         vote_totals = json.loads(result.vote_totals)
-        if result.restaurant_id:
-            winner = restaurant_repo.get_by_id(result.restaurant_id)
+        if vote_totals:
+            top_count = max(vote_totals.values())
+            restaurants_by_name = {r.name: r for r in restaurant_repo.list_all()}
+            # Every restaurant tied for the most votes (usually just
+            # one) — vote_totals already carries every restaurant's
+            # count, so no separate winners table is needed.
+            top_choices = [
+                (restaurants_by_name[name], count)
+                for name, count in vote_totals.items()
+                if count == top_count and name in restaurants_by_name
+            ]
 
     return render_template(
-        "results.html", event=event, result=result, winner=winner, vote_totals=vote_totals
+        "results.html", event=event, result=result, top_choices=top_choices, vote_totals=vote_totals
     )
 
 

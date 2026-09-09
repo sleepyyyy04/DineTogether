@@ -5,7 +5,7 @@
 
   <div class="results-heading">
     <p class="results-eyebrow">FINAL DECISION</p>
-    <h1>🎉 We have a winner!</h1>
+    <h1>{{ '🤝 It\'s a tie!' if top_choices and top_choices|length > 1 else '🎉 We have a winner!' }}</h1>
     <p class="subtitle">{{ event.name }}</p>
   </div>
 
@@ -20,103 +20,88 @@
 
   {% else %}
 
-    {% if result.is_tie %}
-
+    {% if top_choices|length > 1 %}
       <div class="final-result-card tie-card">
         <div class="result-trophy">🤝</div>
         <div>
           <p class="result-label">FINAL RESULT</p>
-          <h2>It's a tie!</h2>
-          <p>No single winner was selected.</p>
+          <h2>It's a tie between {{ top_choices|length }} restaurants!</h2>
+          <p>Each got {{ top_choices[0][1] }} vote{{ 's' if top_choices[0][1] != 1 }} — the group's top picks:</p>
         </div>
       </div>
+    {% endif %}
 
-    {% else %}
+    <div class="top-choices">
+      {% for restaurant, count in top_choices %}
+        <div class="final-result-card" style="
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          background: white;
+          border: 2px solid var(--accent);
+          border-radius: 20px;
+          padding: 18px;
+          margin: 24px 0;
+          overflow: hidden;
+        ">
 
-      {% set cuisine_images = {
-        "Chinese": "images/chinese.png",
-        "Japanese": "images/japanese.png",
-        "Korean": "images/korean.png",
-        "Italian": "images/italian.png",
-        "Mexican": "images/mexican.png",
-        "Thai": "images/thai.png",
-        "American": "images/american.png",
-        "Mediterranean": "images/mediterranean.png",
-        "Seafood": "images/seafood.png"
-      } %}
-
-<div class="final-result-card" style="
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  background: white;
-  border: 2px solid var(--accent);
-  border-radius: 20px;
-  padding: 18px;
-  margin: 24px 0;
-  overflow: hidden;
-">
-
-<div style="
-  width: 220px;
-  height: 160px;
-  flex-shrink: 0;
-  overflow: hidden;
-  border-radius: 16px;
-">
-  <img
-    src="{{ url_for(
-      'static',
-      filename=cuisine_images.get(
-        winner.cuisine,
-        'images/default.png'
-      )
-    ) }}"
-    alt="{{ winner.name }}"
-    style="
-      width: 220px;
-      height: 160px;
-      object-fit: cover;
-      display: block;
-    "
-  >
-</div>
-
-        <div class="winner-details">
-
-          <div class="winner-badge">
-            🏆 WINNER
+          <div style="
+            width: 220px;
+            height: 160px;
+            flex-shrink: 0;
+            overflow: hidden;
+            border-radius: 16px;
+          ">
+            <img
+              src="{{ url_for('static', filename=restaurant.cuisine | cuisine_image) }}"
+              alt="{{ restaurant.name }}"
+              style="
+                width: 220px;
+                height: 160px;
+                object-fit: cover;
+                display: block;
+              "
+            >
           </div>
 
-          <p class="result-label">
-            THE GROUP IS GOING TO
-          </p>
+          <div class="winner-details">
 
-          <h2 class="winner-name">
-            {{ winner.name }}
-          </h2>
+            <div class="winner-badge">
+              {{ '🏆 WINNER' if top_choices|length == 1 else '🤝 TIED' }}
+            </div>
 
-          {% if winner.cuisine %}
+            <p class="result-label">
+              {{ 'THE GROUP IS GOING TO' if top_choices|length == 1 else 'A TOP GROUP PICK' }}
+            </p>
+
+            <h2 class="winner-name">
+              {{ restaurant.name }}
+            </h2>
+
             <p class="winner-meta">
-              {{ winner.cuisine }}
-              {% if winner.price_level %}
-                · {{ '$' * winner.price_level }}
+              {{ count }} vote{{ 's' if count != 1 }}
+              {% if restaurant.cuisine %}
+                · {{ restaurant.cuisine }}
               {% endif %}
-              {% if winner.rating %}
-                · ★ {{ winner.rating }}
+              {% if restaurant.price_level %}
+                · {{ '$' * restaurant.price_level }}
+              {% endif %}
+              {% if restaurant.rating %}
+                · ★ {{ restaurant.rating }}
               {% endif %}
             </p>
-          {% endif %}
 
-          <p class="winner-message">
-            Great choice. Enjoy the meal together!
-          </p>
+            {% if top_choices|length == 1 %}
+              <p class="winner-message">
+                Great choice. Enjoy the meal together!
+              </p>
+            {% endif %}
+
+          </div>
 
         </div>
-
-      </div>
-
-    {% endif %}
+      {% endfor %}
+    </div>
 
 
     {% set total_votes = vote_totals.values() | sum %}
