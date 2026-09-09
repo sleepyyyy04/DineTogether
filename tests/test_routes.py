@@ -1,3 +1,6 @@
+from markupsafe import escape
+
+
 def _register(client, username="alex", display_name="Alex", password="password123"):
     return client.post(
         "/register",
@@ -143,7 +146,7 @@ def test_full_group_flow_preferences_recommendations_vote_and_finalize(client, d
     results_resp = client.get(f"/events/{event_id}/results")
     assert results_resp.status_code == 200
     body = results_resp.get_data(as_text=True)
-    assert top_choice.name in body
+    assert str(escape(top_choice.name)) in body
     assert "2 votes" in body
 
     # Preferences are now locked (FR-03.3 boundary).
