@@ -35,9 +35,17 @@ header.site {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--card);
+
+  padding: 1rem 1.5rem;
+
+  background: rgba(255, 250, 246, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid rgba(255,255,255,0.35);
+
+  position: relative;
+  z-index: 10;
 }
 
 header.site a.brand {
@@ -360,11 +368,583 @@ footer.hint a {
   color: var(--muted);
 }
 
-@media (max-width: 480px) {
-  .page {
-    padding: 1rem 0.75rem 3rem;
+/* Restaurant image cards */
+.restaurant-with-image {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.85rem;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.restaurant-image {
+  width: 130px;
+  height: 95px;
+  object-fit: cover;
+  border-radius: 12px;
+  display: block;
+}
+
+.restaurant-info {
+  min-width: 0;
+}
+
+.restaurant-tags {
+  margin-top: 0.4rem;
+}
+
+
+/* Full page home background（全页首页背景） */
+.home-cover {
+  position: relative;
+
+  width: 100vw;
+  min-height: calc(100vh - 70px);
+
+  margin-left: calc(50% - 50vw);
+  margin-top: -1.5rem;
+  margin-bottom: -4rem;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(30, 20, 15, 0.68) 0%,
+      rgba(30, 20, 15, 0.42) 45%,
+      rgba(30, 20, 15, 0.18) 100%
+    ),
+    url("/static/images/home-hero.png");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  display: flex;
+  align-items: center;
+}
+
+
+/* Overlay（额外柔和遮罩） */
+.home-overlay {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(255, 248, 243, 0.05),
+      rgba(255, 248, 243, 0.12)
+    );
+}
+
+
+/* Main content（主要内容） */
+.home-content {
+  position: relative;
+  z-index: 2;
+
+  width: min(1100px, 92%);
+  margin: 0 auto;
+
+  padding: 4rem 0;
+}
+
+
+/* Glass text panel（玻璃感文字面板） */
+.hero-panel {
+  max-width: 620px;
+
+  background: rgba(255, 250, 246, 0.84);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 28px;
+
+  padding: 2.5rem;
+
+  box-shadow:
+    0 20px 50px rgba(20, 15, 10, 0.20);
+}
+
+
+/* Small heading（小标题） */
+.hero-small {
+  color: var(--accent-dark);
+
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  letter-spacing: 0.18em;
+
+  margin-bottom: 1rem;
+}
+
+
+/* Main title（主标题） */
+.hero-title {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+
+  line-height: 1.02;
+
+  margin: 0 0 1rem;
+
+  color: var(--ink);
+}
+
+
+.hero-title span {
+  display: block;
+
+  margin-top: 0.3rem;
+
+  color: var(--accent);
+
+  text-shadow:
+    0 2px 12px rgba(255, 255, 255, 0.65);
+}
+
+
+/* Description（描述文字） */
+.hero-description {
+  color: #554842;
+
+  font-size: 1.15rem;
+  line-height: 1.65;
+
+  max-width: 520px;
+
+  margin-bottom: 1.5rem;
+}
+
+
+/* Buttons（按钮区域） */
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 0.8rem;
+}
+
+
+.hero-buttons .btn {
+  min-width: 160px;
+
+  border-radius: 999px;
+
+  box-shadow:
+    0 6px 18px rgba(226, 98, 42, 0.20);
+}
+
+
+/* Feature cards（功能卡片） */
+.home-features {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 1rem;
+
+  margin-top: 2rem;
+
+  max-width: 900px;
+}
+
+
+.home-feature {
+  background: rgba(255, 250, 246, 0.78);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(255, 255, 255, 0.5);
+
+  border-radius: 18px;
+
+  padding: 1.15rem;
+
+  text-align: center;
+
+  box-shadow:
+    0 10px 30px rgba(20, 15, 10, 0.10);
+
+  transition: transform 0.2s ease, background 0.2s ease;
+  .home-feature:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 250, 246, 0.90);
+  
+}
+
+
+.home-feature strong {
+  display: block;
+
+  color: var(--ink);
+
+  font-size: 1rem;
+}
+
+
+.home-feature p {
+  color: var(--muted);
+
+  margin: 0.4rem 0 0;
+
+  font-size: 0.9rem;
+}
+
+
+.feature-emoji {
+  font-size: 1.7rem;
+
+  margin-bottom: 0.4rem;
+}
+
+
+/* Final results page（最终结果页面） */
+
+.results-heading {
+  margin-bottom: 1.8rem;
+}
+
+.results-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.results-heading h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.25rem;
+}
+
+
+/* Winner card（冠军餐厅卡片） */
+
+.final-result-card {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+
+  background: var(--card);
+  border: 2px solid var(--accent);
+  border-radius: 22px;
+
+  padding: 1rem;
+  margin-bottom: 2rem;
+
+  box-shadow: 0 14px 35px rgba(43, 36, 32, 0.08);
+}
+
+.winner-image-wrap {
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.winner-image {
+  width: 100%;
+  height: 190px;
+
+  display: block;
+  object-fit: cover;
+}
+
+.winner-details {
+  padding: 0.5rem 1rem 0.5rem 0;
+}
+
+.winner-badge {
+  display: inline-block;
+
+  background: #fff1d8;
+  color: #9b6500;
+
+  border-radius: 999px;
+
+  padding: 0.35rem 0.75rem;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  margin-bottom: 0.8rem;
+}
+
+.result-label {
+  color: var(--muted);
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+
+  margin: 0 0 0.3rem;
+}
+
+.winner-name {
+  color: var(--accent-dark);
+
+  font-size: 1.8rem;
+
+  margin: 0 0 0.4rem;
+}
+
+.winner-meta {
+  color: var(--muted);
+
+  margin: 0 0 0.7rem;
+}
+
+.winner-message {
+  color: var(--ink);
+
+  margin: 0;
+}
+
+
+/* Tie（平票） */
+
+.tie-card {
+  grid-template-columns: auto 1fr;
+  padding: 2rem;
+}
+
+.result-trophy {
+  font-size: 3rem;
+}
+
+
+/* Vote results（投票结果） */
+
+.vote-results-section {
+  background: var(--card);
+
+  border: 1px solid var(--border);
+  border-radius: 20px;
+
+  padding: 1.4rem;
+
+  margin-bottom: 1.5rem;
+}
+
+.vote-results-title {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-end;
+
+  gap: 1rem;
+
+  margin-bottom: 1.4rem;
+}
+
+.vote-results-title h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.total-votes {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.vote-result-row {
+  margin-bottom: 1.2rem;
+}
+
+.vote-result-row:last-child {
+  margin-bottom: 0;
+}
+
+.vote-result-info {
+  display: flex;
+
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 0.45rem;
+}
+
+.vote-result-info span {
+  color: var(--muted);
+
+  font-size: 0.9rem;
+}
+
+.vote-progress {
+  width: 100%;
+  height: 10px;
+
+  background: #eee5dd;
+
+  border-radius: 999px;
+
+  overflow: hidden;
+}
+
+.vote-progress-fill {
+  height: 100%;
+
+  background: var(--accent);
+
+  border-radius: 999px;
+
+  transition: width 0.4s ease;
+}
+
+
+/* Bottom actions（底部按钮） */
+
+.results-actions {
+  display: flex;
+
+  gap: 0.8rem;
+
+  flex-wrap: wrap;
+
+  margin-top: 1.5rem;
+}
+
+.results-actions .btn {
+  border-radius: 999px;
+
+  min-width: 150px;
+}
+
+
+
+
+
+@media (max-width: 700px) {
+
+  .final-result-card {
+    grid-template-columns: 1fr;
   }
-  nav.actions a {
-    flex: 1 1 100%;
+
+  .winner-image {
+    height: 210px;
+  }
+
+  .winner-details {
+    padding: 0.5rem;
+  }
+
+  .vote-results-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+}
+
+
+/* Results page final layout */
+.final-result-card {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+
+  width: 100%;
+  margin: 1.5rem 0 2rem;
+  padding: 1rem;
+
+  background: var(--card);
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(43, 36, 32, 0.08);
+}
+
+/* Winner image */
+.winner-image-wrap {
+  width: 220px;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.winner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Winner information */
+.winner-details {
+  min-width: 0;
+  padding: 0.25rem;
+}
+
+.winner-badge {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  padding: 0.3rem 0.7rem;
+
+  background: #fff1d8;
+  color: #9b6500;
+
+  border-radius: 999px;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.winner-name {
+  margin: 0.25rem 0 0.4rem;
+
+  color: var(--accent-dark);
+
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+.winner-meta,
+.winner-message {
+  margin: 0.35rem 0;
+}
+
+/* Vote results */
+.vote-results-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  padding: 1.3rem;
+  margin-top: 1rem;
+}
+
+.vote-progress {
+  width: 100%;
+  height: 10px;
+
+  margin-top: 0.4rem;
+
+  background: #eee5dd;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.vote-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+/* Mobile layout */
+@media (max-width: 600px) {
+  .final-result-card {
+    grid-template-columns: 1fr;
+  }
+
+  .winner-image-wrap {
+    width: 100%;
+    height: 200px;
   }
 }

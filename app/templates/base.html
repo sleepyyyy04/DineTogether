@@ -9,14 +9,20 @@
 <body>
   <header class="site">
     <a class="brand" href="{{ url_for('main.home') }}">🍽 DineTogether</a>
-    {% if current_user %}
-      <nav class="header-nav">
-        <form method="post" action="{{ url_for('main.logout') }}" class="logout-form">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button type="submit" class="link-button">Log out</button>
-        </form>
-      </nav>
-    {% endif %}
+{% if current_user %}
+  <nav class="header-nav">
+
+    <a href="{{ url_for('main.home') }}">Home</a>
+
+    <a href="{{ url_for('main.history') }}">History</a>
+
+    <form method="post" action="{{ url_for('main.logout') }}" class="logout-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="link-button">Log out</button>
+    </form>
+
+  </nav>
+{% endif %}
   </header>
 
   <div class="page">

@@ -1,37 +1,195 @@
 {% extends "base.html" %}
 {% block title %}Results — {{ event.name }}{% endblock %}
+
 {% block content %}
-  <h1>Final decision</h1>
-  <p class="subtitle">{{ event.name }}</p>
+
+  <div class="results-heading">
+    <p class="results-eyebrow">FINAL DECISION</p>
+    <h1>🎉 We have a winner!</h1>
+    <p class="subtitle">{{ event.name }}</p>
+  </div>
 
   {% if not result %}
+
     <div class="card">
       <p>Voting hasn't been finalized yet.</p>
-      <a class="btn" href="{{ url_for('main.vote', event_id=event.id) }}">Go vote</a>
+      <a class="btn" href="{{ url_for('main.vote', event_id=event.id) }}">
+        Go vote
+      </a>
     </div>
+
   {% else %}
+
     {% if result.is_tie %}
-      <div class="result-banner">
-        <div class="winner">It's a tie! 🤝</div>
-        <p>No single winner was selected.</p>
+
+      <div class="final-result-card tie-card">
+        <div class="result-trophy">🤝</div>
+        <div>
+          <p class="result-label">FINAL RESULT</p>
+          <h2>It's a tie!</h2>
+          <p>No single winner was selected.</p>
+        </div>
       </div>
+
     {% else %}
-      <div class="result-banner">
-        <p>The group is going to</p>
-        <div class="winner">{{ winner.name }}</div>
+
+      {% set cuisine_images = {
+        "Chinese": "images/chinese.png",
+        "Japanese": "images/japanese.png",
+        "Korean": "images/korean.png",
+        "Italian": "images/italian.png",
+        "Mexican": "images/mexican.png",
+        "Thai": "images/thai.png",
+        "American": "images/american.png",
+        "Mediterranean": "images/mediterranean.png",
+        "Seafood": "images/seafood.png"
+      } %}
+
+<div class="final-result-card" style="
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: white;
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  padding: 18px;
+  margin: 24px 0;
+  overflow: hidden;
+">
+
+<div style="
+  width: 220px;
+  height: 160px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 16px;
+">
+  <img
+    src="{{ url_for(
+      'static',
+      filename=cuisine_images.get(
+        winner.cuisine,
+        'images/default.png'
+      )
+    ) }}"
+    alt="{{ winner.name }}"
+    style="
+      width: 220px;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+    "
+  >
+</div>
+
+        <div class="winner-details">
+
+          <div class="winner-badge">
+            🏆 WINNER
+          </div>
+
+          <p class="result-label">
+            THE GROUP IS GOING TO
+          </p>
+
+          <h2 class="winner-name">
+            {{ winner.name }}
+          </h2>
+
+          {% if winner.cuisine %}
+            <p class="winner-meta">
+              {{ winner.cuisine }}
+              {% if winner.price_level %}
+                · {{ '$' * winner.price_level }}
+              {% endif %}
+              {% if winner.rating %}
+                · ★ {{ winner.rating }}
+              {% endif %}
+            </p>
+          {% endif %}
+
+          <p class="winner-message">
+            Great choice. Enjoy the meal together!
+          </p>
+
+        </div>
+
       </div>
+
     {% endif %}
 
-    <h2>Vote totals</h2>
-    <ul class="vote-totals">
-      {% for name, count in vote_totals.items() %}
-        <li><span>{{ name }}</span><span>{{ count }} vote{{ 's' if count != 1 }}</span></li>
-      {% endfor %}
-    </ul>
+
+    {% set total_votes = vote_totals.values() | sum %}
+
+    <section class="vote-results-section">
+
+      <div class="vote-results-title">
+        <div>
+          <p class="results-eyebrow">GROUP CHOICE</p>
+          <h2>Vote results</h2>
+        </div>
+
+        <span class="total-votes">
+          {{ total_votes }} total vote{{ 's' if total_votes != 1 }}
+        </span>
+      </div>
+
+
+      <div class="vote-bars">
+
+        {% for name, count in vote_totals.items() %}
+
+          {% if total_votes > 0 %}
+            {% set percent = ((count / total_votes) * 100) | round | int %}
+          {% else %}
+            {% set percent = 0 %}
+          {% endif %}
+
+          <div class="vote-result-row">
+
+            <div class="vote-result-info">
+
+              <strong>{{ name }}</strong>
+
+              <span>
+                {{ count }} vote{{ 's' if count != 1 }}
+                · {{ percent }}%
+              </span>
+
+            </div>
+
+            <div class="vote-progress">
+              <div
+                class="vote-progress-fill"
+                style="width: {{ percent }}%">
+              </div>
+            </div>
+
+          </div>
+
+        {% endfor %}
+
+      </div>
+
+    </section>
+
   {% endif %}
 
-  <footer class="hint">
-    <a href="{{ url_for('main.event_home', event_id=event.id) }}">Back to event</a> ·
-    <a href="{{ url_for('main.home') }}">Back to home</a>
-  </footer>
+
+  <div class="results-actions">
+
+    <a
+      class="btn secondary"
+      href="{{ url_for('main.event_home', event_id=event.id) }}">
+      ← Back to Event
+    </a>
+
+    <a
+      class="btn"
+      href="{{ url_for('main.home') }}">
+      Back to Home
+    </a>
+
+  </div>
+
 {% endblock %}

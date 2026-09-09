@@ -1,27 +1,66 @@
 {% extends "base.html" %}
-{% block title %}DineTogether{% endblock %}
-{% block content %}
-  <h1>DineTogether</h1>
-  <p class="subtitle">Smart group dining decisions.</p>
 
-  {% if current_user %}
-    <p>Signed in as <strong>{{ current_user.display_name }}</strong>.</p>
-    <div class="card">
-      <nav class="actions">
-        <a class="btn" href="{{ url_for('main.create_event') }}">Create an event</a>
-        <a class="btn secondary" href="{{ url_for('main.join_event') }}">Join an event</a>
-      </nav>
-      <nav class="actions">
-        <a class="btn secondary" href="{{ url_for('main.history') }}">My history</a>
-      </nav>
+{% block content %}
+
+<section class="home-cover">
+
+  <div class="home-overlay"></div>
+
+  <div class="home-content">
+
+    <div class="hero-panel">
+
+      <p class="hero-small">
+        GOOD FOOD · GOOD PEOPLE · BRIGHTER DAYS
+      </p>
+
+      <h1 class="hero-title">
+        DineTogether
+        <span>Smart Group Dining Decisions</span>
+      </h1>
+
+      <p class="hero-description">
+        Plan meals together, discover great restaurants,
+        and make group dining easier for everyone.
+      </p>
+
+      <div class="hero-buttons">
+        <a class="btn" href="{{ url_for('main.create_event') }}">
+          Create Event
+        </a>
+
+        <a class="btn secondary" href="{{ url_for('main.join_event') }}">
+          Join Event
+        </a>
+      </div>
+
     </div>
-  {% else %}
-    <p class="subtitle">Log in or create an account to create and join events.</p>
-    <div class="card">
-      <nav class="actions">
-        <a class="btn" href="{{ url_for('main.login') }}">Log in</a>
-        <a class="btn secondary" href="{{ url_for('main.register') }}">Register</a>
-      </nav>
-    </div>
-  {% endif %}
+
+
+    <section class="home-features">
+
+      <div class="home-feature">
+        <div class="feature-emoji">📅</div>
+        <strong>Plan Together</strong>
+        <p>Create a dining event in seconds.</p>
+      </div>
+
+      <div class="home-feature">
+        <div class="feature-emoji">🍽️</div>
+        <strong>Discover Places</strong>
+        <p>Get personalized restaurant recommendations.</p>
+      </div>
+
+      <div class="home-feature">
+        <div class="feature-emoji">🗳️</div>
+        <strong>Let Everyone Vote</strong>
+        <p>Find a place everyone loves.</p>
+      </div>
+
+    </section>
+
+  </div>
+
+</section>
+
 {% endblock %}
