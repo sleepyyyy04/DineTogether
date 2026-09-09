@@ -21,6 +21,14 @@ class EventFinalizedError(Exception):
     edits are only allowed while the result is not yet saved)."""
 
 
+class AlreadyVotedError(Exception):
+    """Raised when a participant who has already cast a vote tries to
+    change their preferences. The shortlist they voted from is a
+    snapshot of every participant's preferences at that moment —
+    letting it shift afterward could silently invalidate ballots
+    already cast against it."""
+
+
 def submit_preferences(
     pref_repo: PreferenceRepository,
     vote_repo: VoteRepository,
@@ -33,6 +41,9 @@ def submit_preferences(
 ) -> Preference:
     if vote_repo.is_finalized(event_id):
         raise EventFinalizedError(event_id)
+
+    if vote_repo.get_votes_for_participant(event_id, participant_id):
+        raise AlreadyVotedError(event_id)
 
     cuisines = validate_cuisine(raw_cuisines)
     budget_levels = validate_budget(raw_budgets)

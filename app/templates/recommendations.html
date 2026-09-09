@@ -24,12 +24,7 @@
       </div>
     {% endif %}
 
-    {% if finalized %}
-      <div class="card">
-        <p>Voting is closed.</p>
-        <a class="btn" href="{{ url_for('main.results', event_id=event.id) }}">View the final decision</a>
-      </div>
-    {% elif my_vote_ids %}
+    {% if my_vote_ids %}
       <p>Your current vote{{ 's' if my_vote_ids|length > 1 }}: <strong>
         {% for r in result.restaurants if r.id in my_vote_ids %}{{ r.name }}{{ ", " if not loop.last }}{% endfor %}
       </strong> (submitting again replaces your selection).</p>
@@ -40,18 +35,16 @@
 
   <ol class="restaurant-list">
     {% for r in result.restaurants %}
-      <li class="restaurant restaurant-with-image {{ 'restaurant-votable' if not finalized }}">
+      <li class="restaurant restaurant-with-image restaurant-votable">
 
-        {% if not finalized %}
-          <input
-            type="checkbox"
-            name="restaurant_id"
-            value="{{ r.id }}"
-            class="vote-checkbox"
-            aria-label="Vote for {{ r.name }}"
-            {{ 'checked' if r.id in my_vote_ids }}
-          >
-        {% endif %}
+        <input
+          type="checkbox"
+          name="restaurant_id"
+          value="{{ r.id }}"
+          class="vote-checkbox"
+          aria-label="Vote for {{ r.name }}"
+          {{ 'checked' if r.id in my_vote_ids }}
+        >
 
         <img
           class="restaurant-image"
@@ -82,20 +75,14 @@
     {% endfor %}
   </ol>
 
-  {% if not finalized %}
-    <button type="submit">Cast vote</button>
-  {% endif %}
+  <button type="submit">Cast vote</button>
 </form>
 
-    {% if not finalized %}
-      {% if is_creator %}
-        <form method="post" action="{{ url_for('main.finalize', event_id=event.id) }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <button type="submit" class="btn secondary">Finalize results</button>
-        </form>
-      {% else %}
-        <p class="hint">Waiting for the host to finalize the results.</p>
-      {% endif %}
+    {% if is_creator %}
+      <form method="post" action="{{ url_for('main.finalize', event_id=event.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn secondary">Finalize results</button>
+      </form>
     {% endif %}
   {% endif %}
 

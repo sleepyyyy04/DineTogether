@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Waiting — {{ event.name }}{% endblock %}
+{% block content %}
+  <h1>You're all set</h1>
+  <p class="subtitle">{{ event.name }}</p>
+
+  <div class="card">
+    {% if is_creator %}
+      <p>Once everyone's had a chance to vote, finalize to lock in the group's decision.</p>
+      <form method="post" action="{{ url_for('main.finalize', event_id=event.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn secondary">Finalize results</button>
+      </form>
+    {% else %}
+      <p>Your vote is in. Waiting for the other participants to vote, then for the host to finalize the results.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Your vote</h2>
+    {% if my_restaurants %}
+      <ul class="history-list">
+        {% for r in my_restaurants %}
+          <li><strong>{{ r.name }}</strong> — {{ r.cuisine }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>You haven't voted yet.</p>
+      <a class="btn" href="{{ url_for('main.recommendations', event_id=event.id) }}">Go vote</a>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Your preferences</h2>
+    {% if preference %}
+      <p class="meta">
+        Cuisine:
+        {% for c in preference.cuisines %}{{ 'No preference' if c == 'any' else c }}{{ ', ' if not loop.last }}{% endfor %}
+      </p>
+      <p class="meta">
+        Budget:
+        {% for symbol, level in budgets_by_symbol.items() if level in preference.budget_levels %}{{ symbol }} {% endfor %}
+      </p>
+      <p class="meta">
+        Dietary:
+        {% for d in preference.dietary %}{{ 'None' if d == 'none' else d.replace('_', ' ') }}{{ ', ' if not loop.last }}{% endfor %}
+      </p>
+      <p class="meta">Maximum distance: {{ preference.max_distance_mi }} mi</p>
+    {% else %}
+      <p>You haven't submitted preferences.</p>
+    {% endif %}
+  </div>
+
+  <footer class="hint">
+    <a href="{{ url_for('main.event_home', event_id=event.id) }}">Back to event</a> ·
+    <a href="{{ url_for('main.home') }}">Back to home</a>
+  </footer>
+{% endblock %}

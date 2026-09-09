@@ -2,6 +2,7 @@ import pytest
 
 from app.repositories.event_repository import EventRepository
 from app.repositories.preference_repository import PreferenceRepository
+from app.repositories.restaurant_repository import RestaurantRepository
 from app.repositories.vote_repository import VoteRepository
 from app.services import event_service, preference_service
 from app.services.validators import ValidationError
@@ -114,4 +115,24 @@ def test_submit_preferences_rejected_once_event_is_finalized(db, participant):
     with pytest.raises(preference_service.EventFinalizedError):
         preference_service.submit_preferences(
             pref_repo, vote_repo, event_id, participant_id, ["Italian"], ["$$"], ["none"], "5.0"
+        )
+
+
+def test_submit_preferences_rejected_once_participant_has_voted(db, participant):
+    """The shortlist a ballot was cast against must not shift under
+    it, so preferences lock for that participant as soon as they
+    vote — independent of whether the event has been finalized."""
+    event_id, participant_id = participant
+    pref_repo = PreferenceRepository(db)
+    vote_repo = VoteRepository(db)
+    restaurant_id = RestaurantRepository(db).list_all()[0].id
+
+    preference_service.submit_preferences(
+        pref_repo, vote_repo, event_id, participant_id, ["Italian"], ["$$"], ["none"], "5.0"
+    )
+    vote_repo.set_votes(event_id, participant_id, [restaurant_id])
+
+    with pytest.raises(preference_service.AlreadyVotedError):
+        preference_service.submit_preferences(
+            pref_repo, vote_repo, event_id, participant_id, ["Thai"], ["$$$$"], ["none"], "10.0"
         )

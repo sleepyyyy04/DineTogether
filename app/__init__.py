@@ -60,4 +60,7 @@ def create_app(test_config: dict | None = None) -> Flask:
     from app.routes import bp as main_bp
     app.register_blueprint(main_bp)
 
+    from app.admin_routes import bp as admin_bp
+    app.register_blueprint(admin_bp)
+
     return app
