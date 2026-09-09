@@ -3,8 +3,8 @@ Application-logic layer for Restaurant Recommendation (FR-04).
 
 Filtering (FR-04.3) is an intersection of every participant's hard
 constraints: a restaurant only survives if it satisfies EVERY
-participant's accepted budget levels, dietary needs, and distance
-ceiling.
+participant's accepted budget levels, dietary needs, distance
+ceiling, and minimum rating (where set — it's optional).
 
 Cuisine is deliberately NOT a hard filter. A group with mixed cuisine
 preferences could otherwise easily end up with no restaurants.
@@ -41,9 +41,6 @@ from app.repositories.restaurant_repository import (
 
 _FALLBACK_SIZE = 5
 
-# FR-05.1 calls this a shortlist.
-_SHORTLIST_SIZE = 20
-
 
 @dataclass
 class RecommendationResult:
@@ -63,6 +60,8 @@ def _satisfies_all(
     - accepted price level
     - maximum distance
     - every required dietary preference
+    - minimum rating, for participants who set one (it's optional —
+      a participant who didn't set one places no rating constraint)
 
     Cuisine is not a hard filter.
     """
@@ -71,6 +70,9 @@ def _satisfies_all(
             return False
 
         if restaurant.distance_mi > pref.max_distance_mi:
+            return False
+
+        if pref.min_rating is not None and restaurant.rating < pref.min_rating:
             return False
 
         for dietary in pref.dietary:
@@ -174,7 +176,7 @@ def get_recommendations(
                 restaurant,
                 cuisine_votes,
             ),
-        )[:_SHORTLIST_SIZE]
+        )
 
         return RecommendationResult(
             restaurants=ranked,

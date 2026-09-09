@@ -24,7 +24,7 @@ class FakeRestaurantRepo:
         return self._restaurants
 
 
-def _pref(participant_id, cuisines, budget_levels, dietary, max_distance_mi):
+def _pref(participant_id, cuisines, budget_levels, dietary, max_distance_mi, min_rating=None):
     return Preference(
         id=participant_id,
         event_id=1,
@@ -33,6 +33,7 @@ def _pref(participant_id, cuisines, budget_levels, dietary, max_distance_mi):
         budget_levels=budget_levels,
         dietary=dietary,
         max_distance_mi=max_distance_mi,
+        min_rating=min_rating,
     )
 
 
@@ -120,6 +121,35 @@ def test_multiple_dietary_requirements_must_all_be_supported():
     result = get_recommendations(FakePreferenceRepo(prefs), FakeRestaurantRepo(restaurants), event_id=1)
 
     assert [r.id for r in result.restaurants] == [2]
+
+
+def test_min_rating_is_optional_and_excludes_restaurants_below_it_when_set():
+    restaurants = [
+        _restaurant(1, "Lower Rated", "Italian", price_level=2, dietary_tags=[], distance_mi=2.0, rating=3.5),
+        _restaurant(2, "Higher Rated", "Italian", price_level=2, dietary_tags=[], distance_mi=2.0, rating=4.5),
+    ]
+    prefs = [
+        _pref(
+            1, cuisines=["Italian"], budget_levels=[1, 2, 3, 4],
+            dietary=["none"], max_distance_mi=25.0, min_rating=4.0,
+        )
+    ]
+
+    result = get_recommendations(FakePreferenceRepo(prefs), FakeRestaurantRepo(restaurants), event_id=1)
+
+    assert [r.id for r in result.restaurants] == [2]
+
+
+def test_min_rating_left_unset_places_no_constraint():
+    restaurants = [
+        _restaurant(1, "Lower Rated", "Italian", price_level=2, dietary_tags=[], distance_mi=2.0, rating=3.5),
+        _restaurant(2, "Higher Rated", "Italian", price_level=2, dietary_tags=[], distance_mi=2.0, rating=4.5),
+    ]
+    prefs = [_pref(1, cuisines=["Italian"], budget_levels=[1, 2, 3, 4], dietary=["none"], max_distance_mi=25.0)]
+
+    result = get_recommendations(FakePreferenceRepo(prefs), FakeRestaurantRepo(restaurants), event_id=1)
+
+    assert {r.id for r in result.restaurants} == {1, 2}
 
 
 def test_ranking_prefers_more_cuisine_matches_then_higher_rating_deterministically():

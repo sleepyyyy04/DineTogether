@@ -289,6 +289,7 @@ def preferences(event_id: int):
             request.form.getlist("budget"),
             request.form.getlist("dietary"),
             request.form.get("max_distance"),
+            request.form.get("min_rating"),
         )
     except ValidationError as err:
         flash(err.message, "error")
