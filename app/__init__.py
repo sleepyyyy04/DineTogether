@@ -44,8 +44,10 @@ def create_app(test_config: dict | None = None) -> Flask:
     os.makedirs(app.instance_path, exist_ok=True)
 
     # In production behind HTTPS, also set SESSION_COOKIE_SECURE=True.
-    # Left False here so local HTTP development (per SRS 2.1.3) still works.
-    app.config.setdefault("SESSION_COOKIE_SECURE", False)
+    # Defaults to False so local HTTP development (per SRS 2.1.3) still
+    # works, but auto-enables on Render, which sets RENDER=true for
+    # every deployed service.
+    app.config.setdefault("SESSION_COOKIE_SECURE", os.environ.get("RENDER") == "true")
 
     app.teardown_appcontext(close_db)
 
