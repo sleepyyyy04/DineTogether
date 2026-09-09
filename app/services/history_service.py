@@ -18,7 +18,7 @@ from app.repositories.vote_repository import VoteRepository
 @dataclass
 class HistoryEntry:
     event: Event
-    my_choice: Restaurant | None
+    my_choices: list[Restaurant]
     finalized: bool
     is_tie: bool
     winner: Restaurant | None
@@ -33,8 +33,8 @@ def get_history_for_user(
     entries = []
     for event in event_repo.list_events_for_user(user_id):
         participant = event_repo.get_participant_for_user(event.id, user_id)
-        my_vote = vote_repo.get_vote_for_participant(event.id, participant.id) if participant else None
-        my_choice = restaurant_repo.get_by_id(my_vote.restaurant_id) if my_vote else None
+        my_votes = vote_repo.get_votes_for_participant(event.id, participant.id) if participant else []
+        my_choices = [restaurant_repo.get_by_id(vote.restaurant_id) for vote in my_votes]
 
         result = vote_repo.get_result(event.id)
         winner = restaurant_repo.get_by_id(result.restaurant_id) if result and result.restaurant_id else None
@@ -42,7 +42,7 @@ def get_history_for_user(
         entries.append(
             HistoryEntry(
                 event=event,
-                my_choice=my_choice,
+                my_choices=my_choices,
                 finalized=result is not None,
                 is_tie=result.is_tie if result else False,
                 winner=winner,

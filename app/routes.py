@@ -34,6 +34,32 @@ from app.services.validators import (
 bp = Blueprint("main", __name__)
 
 
+# The real Greater LA dataset stores cuisine as a raw phrase (e.g.
+# "Korean barbecue restaurant"), never the short label an image was
+# drawn for, so lookup must be substring-based like every other
+# cuisine match in this app (see Restaurant.matches_cuisine).
+_CUISINE_IMAGES = {
+    "chinese": "images/chinese.png",
+    "japanese": "images/japanese.png",
+    "korean": "images/korean.png",
+    "italian": "images/italian.png",
+    "mexican": "images/mexican.png",
+    "thai": "images/thai.png",
+    "american": "images/american.png",
+    "mediterranean": "images/mediterranean.png",
+    "seafood": "images/seafood.png",
+}
+
+
+@bp.app_template_filter("cuisine_image")
+def cuisine_image(cuisine: str) -> str:
+    cuisine_lower = (cuisine or "").lower()
+    for key, path in _CUISINE_IMAGES.items():
+        if key in cuisine_lower:
+            return path
+    return "images/default.png"
+
+
 def _repo() -> EventRepository:
     return EventRepository(get_db())
 
@@ -71,9 +97,20 @@ def _inject_current_user():
 def _require_session_event(event_id: int):
     """Shared guard for every event-scoped route: the caller's
     session must be tied to this exact event (FR-02 access control),
-    and the event must still exist. Returns the Event or aborts."""
+    and the event must still exist. Returns the Event or aborts.
+
+    A logged-in user revisiting an event from their History page
+    won't have this event as their current session event (that's
+    whichever event they most recently created/joined), so before
+    rejecting we check whether they're actually a participant of the
+    requested event and, if so, re-bind the session to it."""
     if session.get("event_id") != event_id:
-        abort(403)
+        user = _current_user()
+        participant = _repo().get_participant_for_user(event_id, user.id) if user else None
+        if participant is None:
+            abort(403)
+        _start_session_for(event_id, participant.id, participant.display_name)
+
     event = _repo().get_event_by_id(event_id)
     if event is None:
         abort(404)
@@ -123,6 +160,7 @@ def login():
         return render_template("login.html", field_error="username"), 400
 
     _login_session_for(user)
+    flash(f"Welcome back, {user.display_name}!", "success")
     return redirect(url_for("main.home"))
 
 
@@ -263,47 +301,40 @@ def preferences(event_id: int):
 def recommendations(event_id: int):
     event = _require_session_event(event_id)
     result = recommendation_service.get_recommendations(_pref_repo(), _restaurant_repo(), event_id)
-    my_vote = _vote_repo().get_vote_for_participant(event_id, session["participant_id"])
+    my_votes = _vote_repo().get_votes_for_participant(event_id, session["participant_id"])
     return render_template(
         "recommendations.html",
         event=event,
         result=result,
-        my_vote=my_vote,
+        my_vote_ids={v.restaurant_id for v in my_votes},
         finalized=_vote_repo().is_finalized(event_id),
     )
 
 
 @bp.route("/events/<int:event_id>/vote", methods=["GET", "POST"])
 def vote(event_id: int):
-    event = _require_session_event(event_id)
+    _require_session_event(event_id)
     pref_repo, restaurant_repo, vote_repo = _pref_repo(), _restaurant_repo(), _vote_repo()
-    shortlist_result = recommendation_service.get_recommendations(pref_repo, restaurant_repo, event_id)
 
     if request.method == "GET":
-        my_vote = vote_repo.get_vote_for_participant(event_id, session["participant_id"])
-        return render_template(
-            "vote.html",
-            event=event,
-            result=shortlist_result,
-            my_vote=my_vote,
-            finalized=vote_repo.is_finalized(event_id),
-        )
+        # Voting now happens inline on the recommendations page.
+        return redirect(url_for("main.recommendations", event_id=event_id))
 
-    raw_restaurant_id = request.form.get("restaurant_id", "")
+    raw_restaurant_ids = request.form.getlist("restaurant_id")
     try:
-        restaurant_id = int(raw_restaurant_id)
-        voting_service.cast_vote(
-            pref_repo, restaurant_repo, vote_repo, event_id, session["participant_id"], restaurant_id
+        restaurant_ids = [int(raw_id) for raw_id in raw_restaurant_ids]
+        voting_service.cast_votes(
+            pref_repo, restaurant_repo, vote_repo, event_id, session["participant_id"], restaurant_ids
         )
     except (ValueError, voting_service.RestaurantNotOnShortlistError):
-        flash("Choose one of the listed restaurants to vote for.", "error")
-        return redirect(url_for("main.vote", event_id=event_id))
+        flash("Choose at least one of the listed restaurants to vote for.", "error")
+        return redirect(url_for("main.recommendations", event_id=event_id))
     except voting_service.EventFinalizedError:
         flash("Voting is closed; the final decision has already been saved.", "error")
         return redirect(url_for("main.results", event_id=event_id))
 
     flash("Your vote has been recorded.", "success")
-    return redirect(url_for("main.vote", event_id=event_id))
+    return redirect(url_for("main.recommendations", event_id=event_id))
 
 
 @bp.post("/events/<int:event_id>/finalize")
@@ -315,7 +346,7 @@ def finalize(event_id: int):
         voting_service.finalize(pref_repo, restaurant_repo, vote_repo, event_id)
     except voting_service.NoShortlistError:
         flash("At least one vote is needed before results can be finalized.", "error")
-        return redirect(url_for("main.vote", event_id=event_id))
+        return redirect(url_for("main.recommendations", event_id=event_id))
 
     return redirect(url_for("main.results", event_id=event_id))
 

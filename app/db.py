@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS votes (
     participant_id INTEGER NOT NULL REFERENCES participants(id) ON DELETE CASCADE,
     restaurant_id  INTEGER NOT NULL REFERENCES restaurants(id),
     voted_at       TEXT NOT NULL DEFAULT (datetime('now')),
-    UNIQUE(event_id, participant_id)
+    UNIQUE(event_id, participant_id, restaurant_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_votes_event_id ON votes(event_id);

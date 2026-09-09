@@ -108,6 +108,7 @@ class Restaurant:
             return (
                 "gluten-free" in search_text
                 or "gluten free" in search_text
+                or "gluten_free" in search_text
             )
 
         return dietary in search_text

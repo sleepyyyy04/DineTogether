@@ -25,7 +25,7 @@ def test_history_lists_events_the_user_created_or_joined(db, user, make_user):
     )
     assert [e.event.name for e in entries] == ["Friday Dinner"]
     assert entries[0].finalized is False
-    assert entries[0].my_choice is None
+    assert entries[0].my_choices == []
 
 
 def test_history_does_not_include_events_the_user_never_joined(db, user, make_user):
@@ -46,7 +46,7 @@ def test_history_shows_my_vote_and_the_final_result(db, user):
 
     created = event_service.create_event(event_repo, "Friday Dinner", user)
     restaurant = restaurant_repo.list_all()[0]
-    vote_repo.upsert_vote(created.event.id, created.participant.id, restaurant.id)
+    vote_repo.set_votes(created.event.id, created.participant.id, [restaurant.id])
     vote_repo.save_result(
         created.event.id,
         restaurant_id=restaurant.id,
@@ -55,7 +55,7 @@ def test_history_shows_my_vote_and_the_final_result(db, user):
     )
 
     entries = history_service.get_history_for_user(event_repo, vote_repo, restaurant_repo, user.id)
-    assert entries[0].my_choice.id == restaurant.id
+    assert [r.id for r in entries[0].my_choices] == [restaurant.id]
     assert entries[0].finalized is True
     assert entries[0].is_tie is False
     assert entries[0].winner.id == restaurant.id
