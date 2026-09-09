@@ -12,6 +12,7 @@ from app.services.validators import (
     validate_cuisine,
     validate_dietary,
     validate_max_distance,
+    validate_min_rating,
 )
 
 
@@ -38,6 +39,7 @@ def submit_preferences(
     raw_budgets: list[str],
     raw_dietary: list[str],
     raw_max_distance: str,
+    raw_min_rating: str | None = None,
 ) -> Preference:
     if vote_repo.is_finalized(event_id):
         raise EventFinalizedError(event_id)
@@ -49,6 +51,7 @@ def submit_preferences(
     budget_levels = validate_budget(raw_budgets)
     dietary = validate_dietary(raw_dietary)
     max_distance_mi = validate_max_distance(raw_max_distance)
+    min_rating = validate_min_rating(raw_min_rating)
 
     return pref_repo.upsert(
         event_id=event_id,
@@ -57,4 +60,5 @@ def submit_preferences(
         budget_levels=budget_levels,
         dietary=dietary,
         max_distance_mi=max_distance_mi,
+        min_rating=min_rating,
     )

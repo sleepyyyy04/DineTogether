@@ -23,6 +23,7 @@ class Preference:
     budget_levels: list[int] = field(default_factory=list)
     dietary: list[str] = field(default_factory=list)
     max_distance_mi: float = 0.0
+    min_rating: float | None = None
 
 
 def _split(value: str) -> list[str]:
@@ -38,6 +39,7 @@ def _row_to_preference(row: sqlite3.Row) -> Preference:
         budget_levels=[int(v) for v in _split(row["budget_levels"])],
         dietary=_split(row["dietary"]),
         max_distance_mi=row["max_distance_mi"],
+        min_rating=row["min_rating"],
     )
 
 
@@ -53,6 +55,7 @@ class PreferenceRepository:
         budget_levels: list[int],
         dietary: list[str],
         max_distance_mi: float,
+        min_rating: float | None = None,
     ) -> Preference:
         cuisine_value = ",".join(cuisines)
         budget_value = ",".join(str(level) for level in budget_levels)
@@ -60,23 +63,24 @@ class PreferenceRepository:
         self._db.execute(
             """
             INSERT INTO preferences
-                (event_id, participant_id, cuisine, budget_levels, dietary, max_distance_mi, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+                (event_id, participant_id, cuisine, budget_levels, dietary, max_distance_mi, min_rating, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
             ON CONFLICT(participant_id) DO UPDATE SET
                 cuisine = excluded.cuisine,
                 budget_levels = excluded.budget_levels,
                 dietary = excluded.dietary,
                 max_distance_mi = excluded.max_distance_mi,
+                min_rating = excluded.min_rating,
                 updated_at = excluded.updated_at
             """,
-            (event_id, participant_id, cuisine_value, budget_value, dietary_value, max_distance_mi),
+            (event_id, participant_id, cuisine_value, budget_value, dietary_value, max_distance_mi, min_rating),
         )
         self._db.commit()
         return self.get_for_participant(participant_id)
 
     def get_for_participant(self, participant_id: int) -> Preference | None:
         row = self._db.execute(
-            "SELECT id, event_id, participant_id, cuisine, budget_levels, dietary, max_distance_mi "
+            "SELECT id, event_id, participant_id, cuisine, budget_levels, dietary, max_distance_mi, min_rating "
             "FROM preferences WHERE participant_id = ?",
             (participant_id,),
         ).fetchone()
@@ -84,7 +88,7 @@ class PreferenceRepository:
 
     def list_for_event(self, event_id: int) -> list[Preference]:
         rows = self._db.execute(
-            "SELECT id, event_id, participant_id, cuisine, budget_levels, dietary, max_distance_mi "
+            "SELECT id, event_id, participant_id, cuisine, budget_levels, dietary, max_distance_mi, min_rating "
             "FROM preferences WHERE event_id = ? ORDER BY id",
             (event_id,),
         ).fetchall()

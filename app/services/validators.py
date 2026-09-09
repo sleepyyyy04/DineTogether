@@ -113,18 +113,31 @@ ALLOWED_CUISINES = (
     "Japanese",
     "Thai",
     "Mediterranean",
-    "French",
     "Vietnamese",
+    "Korean",
+    "Salvadoran",
+    "Pizza",
+    "Seafood",
+    "Taco",
+    "Hot Pot",
+    "Sushi",
+    "Hamburger",
+    "Chicken",
 )
 
 # Maps a displayed budget tier to the maximum restaurant price_level
 # (1-4, i.e. $ .. $$$$) a participant choosing that tier will accept.
 ALLOWED_BUDGETS = {"$": 1, "$$": 2, "$$$": 3, "$$$$": 4}
 
-ALLOWED_DIETARY = ("none", "vegetarian", "vegan", "gluten_free", "halal", "kosher")
+ALLOWED_DIETARY = ("none", "vegetarian", "vegan", "gluten_free", "halal")
 
 MIN_DISTANCE_MI = 0.5
-MAX_DISTANCE_MI = 25.0
+# Covers the full Greater LA dataset (farthest restaurant is ~71 mi
+# from the Sofia University reference point) with some headroom.
+MAX_DISTANCE_MI = 75.0
+
+MIN_RATING = 0.0
+MAX_RATING = 5.0
 
 
 def validate_cuisine(cuisines: list[str]) -> list[str]:
@@ -167,3 +180,20 @@ def validate_max_distance(raw_distance: str) -> float:
             f"Maximum distance must be between {MIN_DISTANCE_MI} and {MAX_DISTANCE_MI} miles.",
         )
     return distance
+
+
+def validate_min_rating(raw_min_rating: str | None) -> float | None:
+    """Optional: an empty value means no rating preference at all,
+    unlike the other FR-03 fields which all require a selection."""
+    if raw_min_rating is None or not str(raw_min_rating).strip():
+        return None
+    try:
+        rating = float(raw_min_rating)
+    except (TypeError, ValueError):
+        raise ValidationError("min_rating", "Minimum rating must be a number.")
+    if rating < MIN_RATING or rating > MAX_RATING:
+        raise ValidationError(
+            "min_rating",
+            f"Minimum rating must be between {MIN_RATING} and {MAX_RATING}.",
+        )
+    return rating

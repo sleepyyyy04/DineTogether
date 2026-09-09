@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS preferences (
     budget_levels   TEXT NOT NULL,
     dietary         TEXT NOT NULL,
     max_distance_mi REAL NOT NULL,
+    min_rating      REAL,
     updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -102,6 +103,17 @@ CREATE TABLE IF NOT EXISTS results (
 """
 
 
+def _migrate(db: sqlite3.Connection) -> None:
+    """CREATE TABLE IF NOT EXISTS never adds columns to a table that
+    already exists, so a database created before min_rating existed
+    needs it added explicitly — otherwise every preferences query
+    against an already-deployed database breaks."""
+    columns = {row["name"] for row in db.execute("PRAGMA table_info(preferences)")}
+    if "min_rating" not in columns:
+        db.execute("ALTER TABLE preferences ADD COLUMN min_rating REAL")
+        db.commit()
+
+
 def init_db() -> None:
     """Create tables if they don't exist yet (NFR-03.2: data must
     survive and remain readable across an application restart), then
@@ -110,6 +122,7 @@ def init_db() -> None:
     db = get_db()
     db.executescript(SCHEMA)
     db.commit()
+    _migrate(db)
 
     from app.services.restaurant_import import import_restaurants_if_empty
 
@@ -122,4 +135,5 @@ def init_db_command():
     db = get_db()
     db.executescript(SCHEMA)
     db.commit()
+    _migrate(db)
     click.echo("Initialized the database.")

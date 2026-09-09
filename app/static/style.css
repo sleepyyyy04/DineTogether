@@ -155,6 +155,58 @@ select[aria-invalid="true"] {
   border-color: var(--error-ink);
 }
 
+.dropdown-checklist {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.dropdown-checklist summary {
+  padding: 0.6rem 0.7rem;
+  cursor: pointer;
+  font-size: 1rem;
+  list-style: none;
+}
+
+.dropdown-checklist summary::-webkit-details-marker {
+  display: none;
+}
+
+.dropdown-checklist summary::after {
+  content: "▾";
+  float: right;
+  color: var(--muted);
+}
+
+.dropdown-checklist[open] summary::after {
+  content: "▴";
+}
+
+.dropdown-checklist-options {
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 0.4rem;
+  border-top: 1px solid var(--border);
+}
+
+.dropdown-checklist-options .vote-option {
+  margin-bottom: 0.3rem;
+}
+
+.dropdown-checklist-options .vote-option:last-child {
+  margin-bottom: 0;
+}
+
+.option-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.option-row .vote-option {
+  margin-bottom: 0;
+}
+
 button,
 .btn {
   display: inline-block;

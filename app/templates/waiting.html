@@ -46,6 +46,9 @@
         {% for d in preference.dietary %}{{ 'None' if d == 'none' else d.replace('_', ' ') }}{{ ', ' if not loop.last }}{% endfor %}
       </p>
       <p class="meta">Maximum distance: {{ preference.max_distance_mi }} mi</p>
+      {% if preference.min_rating is not none %}
+        <p class="meta">Minimum rating: ★ {{ preference.min_rating }}</p>
+      {% endif %}
     {% else %}
       <p>You haven't submitted preferences.</p>
     {% endif %}

@@ -82,6 +82,9 @@ def test_submitting_again_replaces_the_previous_preference_set(db, participant):
         ("max_distance", (["Italian"], ["$$"], ["none"], "not-a-number")),
         ("max_distance", (["Italian"], ["$$"], ["none"], "0.1")),
         ("max_distance", (["Italian"], ["$$"], ["none"], "100")),
+        ("min_rating", (["Italian"], ["$$"], ["none"], "5.0", "not-a-number")),
+        ("min_rating", (["Italian"], ["$$"], ["none"], "5.0", "5.1")),
+        ("min_rating", (["Italian"], ["$$"], ["none"], "5.0", "-1")),
     ],
 )
 def test_submit_preferences_rejects_invalid_values(db, participant, field, args):
@@ -94,7 +97,7 @@ def test_submit_preferences_rejects_invalid_values(db, participant, field, args)
     assert exc_info.value.field == field
 
 
-@pytest.mark.parametrize("distance", ["0.5", "25.0"])
+@pytest.mark.parametrize("distance", ["0.5", "75.0"])
 def test_submit_preferences_accepts_boundary_distances(db, participant, distance):
     event_id, participant_id = participant
     pref_repo = PreferenceRepository(db)
@@ -104,6 +107,22 @@ def test_submit_preferences_accepts_boundary_distances(db, participant, distance
         pref_repo, vote_repo, event_id, participant_id, ["any"], ["$"], ["none"], distance
     )
     assert saved.max_distance_mi == float(distance)
+
+
+def test_min_rating_is_optional(db, participant):
+    event_id, participant_id = participant
+    pref_repo = PreferenceRepository(db)
+    vote_repo = VoteRepository(db)
+
+    left_blank = preference_service.submit_preferences(
+        pref_repo, vote_repo, event_id, participant_id, ["Italian"], ["$$"], ["none"], "5.0"
+    )
+    assert left_blank.min_rating is None
+
+    with_rating = preference_service.submit_preferences(
+        pref_repo, vote_repo, event_id, participant_id, ["Italian"], ["$$"], ["none"], "5.0", "4.0"
+    )
+    assert with_rating.min_rating == 4.0
 
 
 def test_submit_preferences_rejected_once_event_is_finalized(db, participant):
