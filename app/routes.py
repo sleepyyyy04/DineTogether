@@ -215,7 +215,7 @@ def join_event():
     raw_code = request.form.get("code", "")
 
     try:
-        result = event_service.join_event(_repo(), raw_code, user)
+        result = event_service.join_event(_repo(), _vote_repo(), raw_code, user)
     except ValidationError as err:
         # FR-02.2 / NFR-02.2: identify the invalid field, but never
         # reveal *why* a code failed (malformed vs. unknown look the
@@ -224,6 +224,12 @@ def join_event():
         return render_template("join_event.html", field_error=err.field), 400
     except event_service.EventNotFoundError:
         flash("That invitation code isn't valid.", "error")
+        return render_template("join_event.html", field_error="code"), 404
+    except event_service.InviteCodeExpiredError:
+        flash("This invitation code has expired.", "error")
+        return render_template("join_event.html", field_error="code"), 404
+    except event_service.EventAlreadyFinalizedError:
+        flash("This event is already closed and no longer accepting new participants.", "error")
         return render_template("join_event.html", field_error="code"), 404
 
     _start_session_for(
@@ -308,6 +314,7 @@ def recommendations(event_id: int):
         result=result,
         my_vote_ids={v.restaurant_id for v in my_votes},
         finalized=_vote_repo().is_finalized(event_id),
+        is_creator=_repo().is_creator(event_id, session["user_id"]),
     )
 
 
@@ -340,6 +347,9 @@ def vote(event_id: int):
 @bp.post("/events/<int:event_id>/finalize")
 def finalize(event_id: int):
     _require_session_event(event_id)
+    if not _repo().is_creator(event_id, session["user_id"]):
+        abort(403)
+
     pref_repo, restaurant_repo, vote_repo = _pref_repo(), _restaurant_repo(), _vote_repo()
 
     try:

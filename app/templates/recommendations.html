@@ -88,10 +88,14 @@
 </form>
 
     {% if not finalized %}
-      <form method="post" action="{{ url_for('main.finalize', event_id=event.id) }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn secondary">Finalize results</button>
-      </form>
+      {% if is_creator %}
+        <form method="post" action="{{ url_for('main.finalize', event_id=event.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="btn secondary">Finalize results</button>
+        </form>
+      {% else %}
+        <p class="hint">Waiting for the host to finalize the results.</p>
+      {% endif %}
     {% endif %}
   {% endif %}
 

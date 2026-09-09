@@ -18,7 +18,7 @@ def test_history_lists_events_the_user_created_or_joined(db, user, make_user):
     ben = make_user(display_name="Ben", username="ben")
 
     created = event_service.create_event(event_repo, "Friday Dinner", user)
-    event_service.join_event(event_repo, created.event.invite_code, ben)
+    event_service.join_event(event_repo, VoteRepository(db), created.event.invite_code, ben)
 
     entries = history_service.get_history_for_user(
         event_repo, VoteRepository(db), RestaurantRepository(db), user.id
@@ -26,6 +26,20 @@ def test_history_lists_events_the_user_created_or_joined(db, user, make_user):
     assert [e.event.name for e in entries] == ["Friday Dinner"]
     assert entries[0].finalized is False
     assert entries[0].my_choices == []
+    assert entries[0].is_creator is True
+
+
+def test_history_marks_a_joiner_as_not_the_creator(db, user, make_user):
+    event_repo = EventRepository(db)
+    ben = make_user(display_name="Ben", username="ben")
+
+    created = event_service.create_event(event_repo, "Friday Dinner", user)
+    event_service.join_event(event_repo, VoteRepository(db), created.event.invite_code, ben)
+
+    entries = history_service.get_history_for_user(
+        event_repo, VoteRepository(db), RestaurantRepository(db), ben.id
+    )
+    assert entries[0].is_creator is False
 
 
 def test_history_does_not_include_events_the_user_never_joined(db, user, make_user):
