@@ -26,7 +26,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run pytest
-        run: pytest -v
+        run: python3 -m pytest -v
 
   flake8:
     name: Flake8
