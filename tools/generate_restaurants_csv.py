@@ -72,7 +72,8 @@ def generate_rows(rng: random.Random) -> list[dict]:
 
 
 def main() -> None:
-    rng = random.Random(42)
+    # Deterministic seed for reproducible demo data; not security-sensitive.
+    rng = random.Random(42)  # nosec B311
     rows = generate_rows(rng)
 
     with open(OUTPUT_PATH, "w", newline="", encoding="utf-8") as f:

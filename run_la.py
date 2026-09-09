@@ -207,7 +207,7 @@ def import_raw_restaurants_if_empty(
 
 
 # Patch only this temporary Python process; the original project files remain intact.
-from app.services import restaurant_import, validators
+from app.services import restaurant_import, validators  # noqa: E402
 
 restaurant_import.import_restaurants_if_empty = import_raw_restaurants_if_empty
 
@@ -215,7 +215,7 @@ restaurant_import.import_restaurants_if_empty = import_raw_restaurants_if_empty
 detected_cuisines = sorted({derive_cuisine(row) for row in load_raw_rows()})
 validators.ALLOWED_CUISINES = ("any", *detected_cuisines)
 
-from app import create_app
+from app import create_app  # noqa: E402
 
 app = create_app({"DATABASE": TEST_DB_PATH})
 
