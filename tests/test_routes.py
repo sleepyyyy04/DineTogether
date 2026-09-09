@@ -157,6 +157,53 @@ def test_full_group_flow_preferences_recommendations_vote_and_finalize(client, d
     assert b"already been saved" in locked_resp.data
 
 
+def test_only_the_host_can_finalize_results(client, db):
+    from app.repositories.event_repository import EventRepository
+    from app.repositories.preference_repository import PreferenceRepository
+    from app.repositories.restaurant_repository import RestaurantRepository
+    from app.services.recommendation_service import get_recommendations
+
+    _register(client, username="alex", display_name="Alex")
+    client.post("/events/new", data={"name": "Group Dinner"})
+    with client.session_transaction() as sess:
+        event_id = sess["event_id"]
+
+    invite_code = EventRepository(db).get_event_by_id(event_id).invite_code
+
+    pref_payload = {
+        "cuisine": ["Italian"],
+        "budget": ["$", "$$", "$$$", "$$$$"],
+        "dietary": ["none"],
+        "max_distance": "25",
+    }
+    client.post(f"/events/{event_id}/preferences", data=pref_payload, follow_redirects=True)
+
+    with client.session_transaction() as sess:
+        sess.clear()
+    _register(client, username="ben", display_name="Ben")
+    client.post("/events/join", data={"code": invite_code}, follow_redirects=True)
+    client.post(f"/events/{event_id}/preferences", data=pref_payload, follow_redirects=True)
+
+    top_choice = get_recommendations(PreferenceRepository(db), RestaurantRepository(db), event_id).restaurants[0]
+    client.post(f"/events/{event_id}/vote", data={"restaurant_id": top_choice.id}, follow_redirects=True)
+
+    # Ben (a participant, not the host) may not finalize.
+    denied = client.post(f"/events/{event_id}/finalize")
+    assert denied.status_code == 403
+
+    with client.session_transaction() as sess:
+        sess.clear()
+    client.post("/login", data={"username": "alex", "password": "password123"})
+    with client.session_transaction() as sess:
+        sess["event_id"] = event_id
+        sess["participant_id"] = EventRepository(db).get_participant_for_user(event_id, sess["user_id"]).id
+        sess["display_name"] = "Alex"
+
+    # Alex (the host) may.
+    allowed = client.post(f"/events/{event_id}/finalize", follow_redirects=True)
+    assert allowed.status_code == 200
+
+
 def test_join_endpoint_rate_limits_after_ten_attempts_per_minute(client):
     """NFR-04.6 / code-review Finding 2. The 11th attempt inside the
     same minute must be rejected regardless of whether the code is

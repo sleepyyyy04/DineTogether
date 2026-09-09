@@ -9,9 +9,11 @@ from __future__ import annotations
 import secrets
 import string
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 from app.repositories.event_repository import Event, EventRepository, Participant
 from app.repositories.user_repository import User
+from app.repositories.vote_repository import VoteRepository
 from app.services.validators import validate_event_name, validate_invite_code_format
 
 # Unambiguous alphabet: no 0/O or 1/I, so a participant reading the
@@ -21,11 +23,27 @@ _CODE_ALPHABET = "".join(c for c in string.ascii_uppercase + string.digits if c 
 _CODE_LENGTH = 4
 _MAX_CODE_ATTEMPTS = 10
 
+# How long an invite code stays usable for a *new* participant after
+# the event was created. Someone who already joined can always get
+# back in — this only gates first-time joins.
+INVITE_CODE_TTL = timedelta(minutes=30)
+
 
 class EventNotFoundError(Exception):
     """Raised by join_event for a well-formed but unknown code (FR-02.2).
     Callers should render the same non-sensitive message they'd use
     for a malformed code — see routes.py."""
+
+
+class InviteCodeExpiredError(Exception):
+    """Raised when a new participant tries to join more than
+    INVITE_CODE_TTL after the event was created."""
+
+
+class EventAlreadyFinalizedError(Exception):
+    """Raised when a new participant tries to join an event whose
+    final decision has already been saved — voting and preferences
+    are locked by then, so there is nothing left to join for."""
 
 
 @dataclass
@@ -63,13 +81,16 @@ def create_event(repo: EventRepository, name: str, user: User) -> JoinResult:
     return JoinResult(event=event, participant=participant)
 
 
-def join_event(repo: EventRepository, raw_code: str, user: User) -> JoinResult:
+def join_event(repo: EventRepository, vote_repo: VoteRepository, raw_code: str, user: User) -> JoinResult:
     """FR-02.1 / FR-02.2 / FR-02.3.
 
     Joining the same event twice with the same account is idempotent
     (UNIQUE(event_id, user_id) in the schema) — it returns the
     existing participant row rather than erroring, since re-visiting
-    an invite link is a normal thing to do.
+    an invite link is a normal thing to do. That idempotent path is
+    checked before the expiry/finalized gates below, so someone who
+    already joined never gets locked out of an event they're already
+    part of.
     """
     code = validate_invite_code_format(raw_code)
 
@@ -78,5 +99,15 @@ def join_event(repo: EventRepository, raw_code: str, user: User) -> JoinResult:
         raise EventNotFoundError(code)
 
     existing = repo.get_participant_for_user(event.id, user.id)
-    participant = existing or repo.add_participant(event.id, user.id, user.display_name)
+    if existing is not None:
+        return JoinResult(event=event, participant=existing)
+
+    if vote_repo.is_finalized(event.id):
+        raise EventAlreadyFinalizedError(event.id)
+
+    created_at = datetime.strptime(event.created_at, "%Y-%m-%d %H:%M:%S")
+    if datetime.utcnow() - created_at > INVITE_CODE_TTL:
+        raise InviteCodeExpiredError(event.id)
+
+    participant = repo.add_participant(event.id, user.id, user.display_name)
     return JoinResult(event=event, participant=participant)

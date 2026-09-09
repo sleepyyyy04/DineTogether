@@ -27,7 +27,7 @@ def two_participants_with_preferences(db, make_user):
     ben = make_user(display_name="Ben", username="ben")
 
     organizer = event_service.create_event(event_repo, "Group Dinner", alex)
-    joiner = event_service.join_event(event_repo, organizer.event.invite_code, ben)
+    joiner = event_service.join_event(event_repo, vote_repo, organizer.event.invite_code, ben)
 
     event_id = organizer.event.id
     preference_service.submit_preferences(pref_repo, vote_repo, event_id, organizer.participant.id, **WIDE_OPEN)
