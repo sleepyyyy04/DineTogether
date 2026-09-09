@@ -1,7 +1,8 @@
 """
-Data-access layer for FR-05 Voting and Result Management. Votes are
-upserted per (event_id, participant_id) so a repeat vote replaces the
-previous one (FR-05.2). Results are written once per event, at
+Data-access layer for FR-05 Voting and Result Management. A
+participant may approve any number of shortlisted restaurants;
+resubmitting replaces their whole prior selection (FR-05.2) rather
+than adding to it. Results are written once per event, at
 finalization, and are the durable record voting_service and the
 results page read back (FR-05.5).
 """
@@ -32,44 +33,37 @@ class VoteRepository:
     def __init__(self, db: sqlite3.Connection):
         self._db = db
 
-    def upsert_vote(self, event_id: int, participant_id: int, restaurant_id: int) -> Vote:
+    def set_votes(self, event_id: int, participant_id: int, restaurant_ids: list[int]) -> list[Vote]:
+        """Replace this participant's entire selection for the event
+        with restaurant_ids (FR-05.2: resubmitting replaces, not
+        adds)."""
         self._db.execute(
-            """
-            INSERT INTO votes (event_id, participant_id, restaurant_id, voted_at)
-            VALUES (?, ?, ?, datetime('now'))
-            ON CONFLICT(event_id, participant_id) DO UPDATE SET
-                restaurant_id = excluded.restaurant_id,
-                voted_at = excluded.voted_at
-            """,
-            (event_id, participant_id, restaurant_id),
+            "DELETE FROM votes WHERE event_id = ? AND participant_id = ?",
+            (event_id, participant_id),
+        )
+        self._db.executemany(
+            "INSERT INTO votes (event_id, participant_id, restaurant_id, voted_at) "
+            "VALUES (?, ?, ?, datetime('now'))",
+            [(event_id, participant_id, restaurant_id) for restaurant_id in restaurant_ids],
         )
         self._db.commit()
-        row = self._db.execute(
-            "SELECT id, event_id, participant_id, restaurant_id FROM votes "
-            "WHERE event_id = ? AND participant_id = ?",
-            (event_id, participant_id),
-        ).fetchone()
-        return Vote(
-            id=row["id"],
-            event_id=row["event_id"],
-            participant_id=row["participant_id"],
-            restaurant_id=row["restaurant_id"],
-        )
+        return self.get_votes_for_participant(event_id, participant_id)
 
-    def get_vote_for_participant(self, event_id: int, participant_id: int) -> Vote | None:
-        row = self._db.execute(
+    def get_votes_for_participant(self, event_id: int, participant_id: int) -> list[Vote]:
+        rows = self._db.execute(
             "SELECT id, event_id, participant_id, restaurant_id FROM votes "
             "WHERE event_id = ? AND participant_id = ?",
             (event_id, participant_id),
-        ).fetchone()
-        if row is None:
-            return None
-        return Vote(
-            id=row["id"],
-            event_id=row["event_id"],
-            participant_id=row["participant_id"],
-            restaurant_id=row["restaurant_id"],
-        )
+        ).fetchall()
+        return [
+            Vote(
+                id=row["id"],
+                event_id=row["event_id"],
+                participant_id=row["participant_id"],
+                restaurant_id=row["restaurant_id"],
+            )
+            for row in rows
+        ]
 
     def get_vote_counts(self, event_id: int) -> dict[int, int]:
         """restaurant_id -> number of votes, for restaurants with >=1 vote."""

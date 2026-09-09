@@ -23,7 +23,7 @@
     <nav class="actions">
       <a class="btn secondary" href="{{ url_for('main.preferences', event_id=event.id) }}">Preferences</a>
       <a class="btn secondary" href="{{ url_for('main.recommendations', event_id=event.id) }}">Recommendations</a>
-      <a class="btn secondary" href="{{ url_for('main.vote', event_id=event.id) }}">Vote</a>
+      <a class="btn secondary" href="{{ url_for('main.recommendations', event_id=event.id) }}">Vote</a>
       <a class="btn secondary" href="{{ url_for('main.results', event_id=event.id) }}">Results</a>
     </nav>
   {% endif %}

@@ -14,8 +14,8 @@
       {% for entry in entries %}
         <li>
           <a href="{{ url_for('main.event_home', event_id=entry.event.id) }}"><strong>{{ entry.event.name }}</strong></a>
-          {% if entry.my_choice %}
-            <div class="meta">Your vote: {{ entry.my_choice.name }}</div>
+          {% if entry.my_choices %}
+            <div class="meta">Your vote{{ 's' if entry.my_choices|length > 1 }}: {{ entry.my_choices|map(attribute='name')|join(', ') }}</div>
           {% endif %}
           {% if entry.finalized %}
             {% if entry.is_tie %}

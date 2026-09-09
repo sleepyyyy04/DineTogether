@@ -47,13 +47,30 @@ def test_cast_vote_records_a_vote_for_a_shortlisted_restaurant(db, two_participa
     shortlist = get_recommendations(pref_repo, restaurant_repo, event_id).restaurants
     choice = shortlist[0]
 
-    voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, choice.id)
+    voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, [choice.id])
 
-    recorded = vote_repo.get_vote_for_participant(event_id, alex_id)
-    assert recorded.restaurant_id == choice.id
+    recorded = vote_repo.get_votes_for_participant(event_id, alex_id)
+    assert [v.restaurant_id for v in recorded] == [choice.id]
 
 
-def test_casting_another_vote_replaces_the_previous_one(db, two_participants_with_preferences):
+def test_cast_vote_can_select_multiple_restaurants(db, two_participants_with_preferences):
+    event_id, alex_id, _ = two_participants_with_preferences
+    pref_repo, restaurant_repo, vote_repo = _repos(db)
+
+    shortlist = get_recommendations(pref_repo, restaurant_repo, event_id).restaurants
+    first_choice, second_choice = shortlist[0], shortlist[1]
+
+    voting_service.cast_votes(
+        pref_repo, restaurant_repo, vote_repo, event_id, alex_id, [first_choice.id, second_choice.id]
+    )
+
+    recorded = {v.restaurant_id for v in vote_repo.get_votes_for_participant(event_id, alex_id)}
+    assert recorded == {first_choice.id, second_choice.id}
+    counts = vote_repo.get_vote_counts(event_id)
+    assert counts == {first_choice.id: 1, second_choice.id: 1}
+
+
+def test_casting_another_vote_replaces_the_previous_selection(db, two_participants_with_preferences):
     """FR-05.2."""
     event_id, alex_id, _ = two_participants_with_preferences
     pref_repo, restaurant_repo, vote_repo = _repos(db)
@@ -61,11 +78,11 @@ def test_casting_another_vote_replaces_the_previous_one(db, two_participants_wit
     shortlist = get_recommendations(pref_repo, restaurant_repo, event_id).restaurants
     first_choice, second_choice = shortlist[0], shortlist[1]
 
-    voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, first_choice.id)
-    voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, second_choice.id)
+    voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, [first_choice.id])
+    voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, [second_choice.id])
 
-    recorded = vote_repo.get_vote_for_participant(event_id, alex_id)
-    assert recorded.restaurant_id == second_choice.id
+    recorded = vote_repo.get_votes_for_participant(event_id, alex_id)
+    assert [v.restaurant_id for v in recorded] == [second_choice.id]
     counts = vote_repo.get_vote_counts(event_id)
     assert counts == {second_choice.id: 1}
 
@@ -81,7 +98,15 @@ def test_cast_vote_rejects_a_restaurant_outside_the_shortlist(db, two_participan
     excluded = next(r for r in restaurant_repo.list_all() if r.id not in shortlist_ids)
 
     with pytest.raises(voting_service.RestaurantNotOnShortlistError):
-        voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, excluded.id)
+        voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, [excluded.id])
+
+
+def test_cast_vote_rejects_an_empty_selection(db, two_participants_with_preferences):
+    event_id, alex_id, _ = two_participants_with_preferences
+    pref_repo, restaurant_repo, vote_repo = _repos(db)
+
+    with pytest.raises(voting_service.RestaurantNotOnShortlistError):
+        voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, [])
 
 
 def test_finalize_with_no_votes_cast_raises(db, two_participants_with_preferences):
@@ -98,8 +123,8 @@ def test_finalize_picks_the_restaurant_with_the_most_votes(db, two_participants_
     pref_repo, restaurant_repo, vote_repo = _repos(db)
 
     winner = get_recommendations(pref_repo, restaurant_repo, event_id).restaurants[0]
-    voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, winner.id)
-    voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, ben_id, winner.id)
+    voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, [winner.id])
+    voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, ben_id, [winner.id])
 
     outcome = voting_service.finalize(pref_repo, restaurant_repo, vote_repo, event_id)
 
@@ -121,8 +146,8 @@ def test_finalize_with_a_tie_saves_no_single_winner(db, two_participants_with_pr
     shortlist = get_recommendations(pref_repo, restaurant_repo, event_id).restaurants
     first_choice, second_choice = shortlist[0], shortlist[1]
 
-    voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, first_choice.id)
-    voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, ben_id, second_choice.id)
+    voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, [first_choice.id])
+    voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, ben_id, [second_choice.id])
 
     outcome = voting_service.finalize(pref_repo, restaurant_repo, vote_repo, event_id)
 
@@ -136,11 +161,11 @@ def test_vote_and_finalize_rejected_after_finalization(db, two_participants_with
     pref_repo, restaurant_repo, vote_repo = _repos(db)
 
     winner = get_recommendations(pref_repo, restaurant_repo, event_id).restaurants[0]
-    voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, winner.id)
+    voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, alex_id, [winner.id])
     voting_service.finalize(pref_repo, restaurant_repo, vote_repo, event_id)
 
     with pytest.raises(voting_service.EventFinalizedError):
-        voting_service.cast_vote(pref_repo, restaurant_repo, vote_repo, event_id, ben_id, winner.id)
+        voting_service.cast_votes(pref_repo, restaurant_repo, vote_repo, event_id, ben_id, [winner.id])
 
     # Finalizing again is idempotent: it returns the already-saved result rather than erroring.
     outcome = voting_service.finalize(pref_repo, restaurant_repo, vote_repo, event_id)

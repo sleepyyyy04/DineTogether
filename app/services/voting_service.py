@@ -20,8 +20,8 @@ class EventFinalizedError(Exception):
 
 class RestaurantNotOnShortlistError(Exception):
     """Raised when a vote targets a restaurant outside the current
-    recommendation shortlist (FR-05.1: vote for one restaurant "on
-    the shortlist")."""
+    recommendation shortlist, or when no restaurant was selected at
+    all (FR-05.1: vote for restaurants "on the shortlist")."""
 
 
 class NoShortlistError(Exception):
@@ -35,22 +35,22 @@ class FinalizeOutcome:
     winner_name: str | None
 
 
-def cast_vote(
+def cast_votes(
     pref_repo: PreferenceRepository,
     restaurant_repo: RestaurantRepository,
     vote_repo: VoteRepository,
     event_id: int,
     participant_id: int,
-    restaurant_id: int,
-) -> Vote:
+    restaurant_ids: list[int],
+) -> list[Vote]:
     if vote_repo.is_finalized(event_id):
         raise EventFinalizedError(event_id)
 
-    shortlist = get_recommendations(pref_repo, restaurant_repo, event_id).restaurants
-    if not any(r.id == restaurant_id for r in shortlist):
-        raise RestaurantNotOnShortlistError(restaurant_id)
+    shortlist_ids = {r.id for r in get_recommendations(pref_repo, restaurant_repo, event_id).restaurants}
+    if not restaurant_ids or any(rid not in shortlist_ids for rid in restaurant_ids):
+        raise RestaurantNotOnShortlistError(restaurant_ids)
 
-    return vote_repo.upsert_vote(event_id, participant_id, restaurant_id)
+    return vote_repo.set_votes(event_id, participant_id, restaurant_ids)
 
 
 def finalize(

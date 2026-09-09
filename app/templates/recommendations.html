@@ -24,53 +24,74 @@
       </div>
     {% endif %}
 
-{% set cuisine_images = {
-  "Chinese": "images/chinese.png",
-  "Japanese": "images/japanese.png",
-  "Korean": "images/korean.png",
-  "Italian": "images/italian.png",
-  "Mexican": "images/mexican.png",
-  "Thai": "images/thai.png",
-  "American": "images/american.png",
-  "Mediterranean": "images/mediterranean.png",
-  "Seafood": "images/seafood.png"
-} %}
+    {% if finalized %}
+      <div class="card">
+        <p>Voting is closed.</p>
+        <a class="btn" href="{{ url_for('main.results', event_id=event.id) }}">View the final decision</a>
+      </div>
+    {% elif my_vote_ids %}
+      <p>Your current vote{{ 's' if my_vote_ids|length > 1 }}: <strong>
+        {% for r in result.restaurants if r.id in my_vote_ids %}{{ r.name }}{{ ", " if not loop.last }}{% endfor %}
+      </strong> (submitting again replaces your selection).</p>
+    {% endif %}
 
-<ol class="restaurant-list">
-  {% for r in result.restaurants %}
-    <li class="restaurant restaurant-with-image">
+<form method="post" action="{{ url_for('main.vote', event_id=event.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-      <img
-        class="restaurant-image"
-        src="{{ url_for('static', filename=cuisine_images.get(r.cuisine, 'images/default.png')) }}"
-        alt="{{ r.cuisine }} food"
-      >
+  <ol class="restaurant-list">
+    {% for r in result.restaurants %}
+      <li class="restaurant restaurant-with-image {{ 'restaurant-votable' if not finalized }}">
 
-      <div class="restaurant-info">
-        <div class="name">{{ r.name }}</div>
+        {% if not finalized %}
+          <input
+            type="checkbox"
+            name="restaurant_id"
+            value="{{ r.id }}"
+            class="vote-checkbox"
+            aria-label="Vote for {{ r.name }}"
+            {{ 'checked' if r.id in my_vote_ids }}
+          >
+        {% endif %}
 
-        <div class="meta">
-          {{ r.cuisine }}
-          · {{ '$' * r.price_level }}
-          · {{ r.distance_mi }} mi
-          · ★ {{ r.rating }}
+        <img
+          class="restaurant-image"
+          src="{{ url_for('static', filename=r.cuisine | cuisine_image) }}"
+          alt="{{ r.cuisine }} food"
+        >
+
+        <div class="restaurant-info">
+          <div class="name">{{ r.name }}</div>
+
+          <div class="meta">
+            {{ r.cuisine }}
+            · {{ '$' * r.price_level }}
+            · {{ r.distance_mi }} mi
+            · ★ {{ r.rating }}
+          </div>
+
+          {% if r.dietary_tags %}
+            <div class="restaurant-tags">
+              {% for tag in r.dietary_tags %}
+                <span class="tag">{{ tag.replace('_', ' ') }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
         </div>
 
-        {% if r.dietary_tags %}
-          <div class="restaurant-tags">
-            {% for tag in r.dietary_tags %}
-              <span class="tag">{{ tag.replace('_', ' ') }}</span>
-            {% endfor %}
-          </div>
-        {% endif %}
-      </div>
+      </li>
+    {% endfor %}
+  </ol>
 
-    </li>
-  {% endfor %}
-</ol>
+  {% if not finalized %}
+    <button type="submit">Cast vote</button>
+  {% endif %}
+</form>
 
     {% if not finalized %}
-      <a class="btn" href="{{ url_for('main.vote', event_id=event.id) }}">Proceed to vote</a>
+      <form method="post" action="{{ url_for('main.finalize', event_id=event.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn secondary">Finalize results</button>
+      </form>
     {% endif %}
   {% endif %}
 

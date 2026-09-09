@@ -71,6 +71,12 @@ header.site nav.header-nav a {
   margin: 0;
 }
 
+.welcome-badge {
+  color: var(--accent-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
 button.link-button {
   background: none;
   border: none;
@@ -393,6 +399,18 @@ footer.hint a {
 
 .restaurant-tags {
   margin-top: 0.4rem;
+}
+
+.restaurant-votable {
+  grid-template-columns: auto 130px 1fr;
+}
+
+.vote-checkbox {
+  width: 1.2rem;
+  height: 1.2rem;
+  flex-shrink: 0;
+  margin: 0;
+  justify-self: center;
 }
 
 
