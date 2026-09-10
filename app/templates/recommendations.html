@@ -30,12 +30,24 @@
       </strong> (submitting again replaces your selection).</p>
     {% endif %}
 
+    <div class="filter-toolbar">
+      <select id="sort-by" aria-label="Sort restaurants">
+        <option value="recommended">Sort: Recommended</option>
+        <option value="rating">Sort: Rating (high to low)</option>
+        <option value="distance">Sort: Distance (near to far)</option>
+        <option value="name">Sort: Name (A–Z)</option>
+      </select>
+    </div>
+
 <form method="post" action="{{ url_for('main.vote', event_id=event.id) }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
   <ol class="restaurant-list">
     {% for r in result.restaurants %}
-      <li class="restaurant restaurant-with-image restaurant-votable">
+      <li class="restaurant restaurant-with-image restaurant-votable"
+          data-name="{{ r.name }}"
+          data-rating="{{ r.rating }}"
+          data-distance="{{ r.distance_mi }}">
 
         <input
           type="checkbox"

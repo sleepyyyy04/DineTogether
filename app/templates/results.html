@@ -33,34 +33,13 @@
 
     <div class="top-choices">
       {% for restaurant, count in top_choices %}
-        <div class="final-result-card" style="
-          display: flex;
-          align-items: center;
-          gap: 24px;
-          background: white;
-          border: 2px solid var(--accent);
-          border-radius: 20px;
-          padding: 18px;
-          margin: 24px 0;
-          overflow: hidden;
-        ">
+        <div class="final-result-card{{ ' tied' if top_choices|length > 1 }}">
 
-          <div style="
-            width: 220px;
-            height: 160px;
-            flex-shrink: 0;
-            overflow: hidden;
-            border-radius: 16px;
-          ">
+          <div class="winner-image-wrap">
             <img
+              class="winner-image"
               src="{{ url_for('static', filename=restaurant.cuisine | cuisine_image) }}"
               alt="{{ restaurant.name }}"
-              style="
-                width: 220px;
-                height: 160px;
-                object-fit: cover;
-                display: block;
-              "
             >
           </div>
 
@@ -89,7 +68,18 @@
               {% if restaurant.rating %}
                 · ★ {{ restaurant.rating }}
               {% endif %}
+              {% if restaurant.distance_mi %}
+                · {{ restaurant.distance_mi }} mi
+              {% endif %}
             </p>
+
+            {% if restaurant.dietary_tags %}
+              <div class="restaurant-tags">
+                {% for tag in restaurant.dietary_tags %}
+                  <span class="tag">{{ tag.replace('_', ' ') }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
 
             {% if top_choices|length == 1 %}
               <p class="winner-message">

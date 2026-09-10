@@ -19,11 +19,33 @@
   <div class="card">
     <h2>Your vote</h2>
     {% if my_restaurants %}
-      <ul class="history-list">
+      <div class="restaurant-list">
         {% for r in my_restaurants %}
-          <li><strong>{{ r.name }}</strong> — {{ r.cuisine }}</li>
+          <div class="restaurant restaurant-with-image restaurant-plain">
+            <img
+              class="restaurant-image"
+              src="{{ url_for('static', filename=r.cuisine | cuisine_image) }}"
+              alt="{{ r.cuisine }} food"
+            >
+            <div class="restaurant-info">
+              <div class="name">{{ r.name }}</div>
+              <div class="meta">
+                {{ r.cuisine }}
+                · {{ '$' * r.price_level }}
+                · {{ r.distance_mi }} mi
+                · ★ {{ r.rating }}
+              </div>
+              {% if r.dietary_tags %}
+                <div class="restaurant-tags">
+                  {% for tag in r.dietary_tags %}
+                    <span class="tag">{{ tag.replace('_', ' ') }}</span>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
         {% endfor %}
-      </ul>
+      </div>
     {% else %}
       <p>You haven't voted yet.</p>
       <a class="btn" href="{{ url_for('main.recommendations', event_id=event.id) }}">Go vote</a>
