@@ -11,7 +11,7 @@
       <fieldset class="option-group" aria-invalid="{{ 'true' if field_error == 'cuisine' else 'false' }}">
         <legend>Cuisine (choose one or more)</legend>
         <details class="dropdown-checklist">
-          <summary>
+          <summary data-placeholder="Choose cuisines">
             {% if preference and preference.cuisines %}
               {{ preference.cuisines|length }} selected
             {% else %}
